@@ -23,6 +23,7 @@ const RestaurantDashboard = () => {
     {
       id: 1,
       name: "🍕 10 Pizzas",
+      quantity: "10",
       expiry: "Expiring in 2 hours",
       location: "Downtown",
       description: "Cheese and pepperoni pizzas.",
@@ -31,6 +32,7 @@ const RestaurantDashboard = () => {
     {
       id: 2,
       name: "🥗 5 Salads",
+      quantity: "5",
       expiry: "Expiring in 4 hours",
       location: "Midtown",
       description: "Fresh green salads.",
@@ -40,6 +42,7 @@ const RestaurantDashboard = () => {
   const [formData, setFormData] = useState({
     name: "",
     expiry: "",
+    quantity: "",
     location: "",
     description: "",
     status: "available",
@@ -70,6 +73,7 @@ const RestaurantDashboard = () => {
       setFormData({
         name: "",
         expiry: "",
+        quantity: "",
         location: "",
         description: "",
         status: "available",
@@ -87,6 +91,7 @@ const RestaurantDashboard = () => {
     setFormData({
       name: donation.name,
       expiry: donation.expiry,
+      quantity: donation.quantity,
       location: donation.location,
       description: donation.description,
       status: donation.status,
@@ -186,6 +191,29 @@ const RestaurantDashboard = () => {
     { id: 1, message: "New pickup request from NGO XYZ", time: "2 hours ago" },
     { id: 2, message: "Donation claimed by NGO ABC", time: "4 hours ago" },
   ]);
+
+  const foodItems = [
+    "Cooked Rice",
+    "Chapati/Roti",
+    "Vegetable Curry",
+    "Dal (Lentils)",
+    "Fried Rice",
+    "Pulao/Biryani",
+    "Bread",
+    "Sandwiches",
+    "Salads",
+    "Cut Fruits",
+    "Boiled Eggs",
+    "Grilled Chicken",
+    "Fried Fish",
+    "Pasta",
+    "Noodles",
+    "Paneer Dishes",
+    "Sweets/Desserts",
+    "Milk",
+    "Juice",
+    "Packaged Water Bottles",
+  ];
 
   return (
     <div className="flex h-screen bg-gray-100 flex-col md:flex-row">
@@ -374,7 +402,8 @@ const RestaurantDashboard = () => {
                       {donation.status}
                     </span>
                   </div>
-                  <p className="text-gray-600 mb-2">{donation.description}</p>
+                  <p className="text-gray-600 mb-2">Description: {donation.description}</p>
+                  <p className="text-gray-600 mb-2">Quantity: {donation.quantity}</p>
                   <p className="text-gray-500 text-sm mb-2">
                     📍 {donation.location}
                   </p>
@@ -405,21 +434,35 @@ const RestaurantDashboard = () => {
                     {editingId ? "Edit Donation" : "Add New Donation"}
                   </h3>
                   <form onSubmit={addDonation} className="space-y-4">
-                    <input
-                      type="text"
+                    <select
                       name="name"
-                      placeholder="Food Name"
-                      className="border p-2 w-full rounded-lg"
                       value={formData.name}
                       onChange={handleChange}
+                      className="border p-2 w-full rounded-lg"
+                      placeholder="Select Food Item"
                       required
-                    />
+                    >
+                      {foodItems.map((item, index) => (
+                        <option key={index} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
                     <input
                       type="text"
                       name="expiry"
                       placeholder="Expiry Time"
                       className="border p-2 w-full rounded-lg"
                       value={formData.expiry}
+                      onChange={handleChange}
+                      required
+                    />
+                    <input
+                      type="text"
+                      name="quantity"
+                      placeholder="Quantity"
+                      className="border p-2 w-full rounded-lg"
+                      value={formData.quantity}
                       onChange={handleChange}
                       required
                     />

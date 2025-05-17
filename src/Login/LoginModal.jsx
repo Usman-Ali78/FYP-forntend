@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
-import image from "../assets/loginimg.avif";
+import image from "../assets/login.avif";
 
 const LoginModal = () => {
   const navigate = useNavigate();

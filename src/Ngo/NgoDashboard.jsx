@@ -150,7 +150,7 @@ function NgoDashboard() {
                     donation.expires === "1 hour" ? "border-l-4 border-red-500" : ""
                   }`}
                 >
-                  <h2 className="text-lg font-semibold">{donation.donor}</h2>
+                  <h2 className="text-lg font-semibold">Donor: {donation.donor}</h2>
                   <p className="text-sm text-gray-500">
                     {donation.location} <FaMapMarkerAlt className="inline h-4 w-4" />
                   </p>
@@ -197,7 +197,7 @@ function NgoDashboard() {
                     className="p-4 shadow-md rounded-lg border-l-4 border-green-500 bg-green-100"
                   >
                     <p className="text-lg font-semibold flex items-center gap-2">
-                      <FaClipboardCheck className="h-5 w-5 text-green-600" /> {donation.donor}
+                      <FaClipboardCheck className="h-5 w-5 text-green-600" />Donor: {donation.donor}
                     </p>
                     <p className="text-sm">Quantity: {donation.quantity}</p>
                     <p className="text-sm text-gray-600">Completed At: {donation.completedAt}</p>

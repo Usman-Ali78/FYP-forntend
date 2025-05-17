@@ -179,7 +179,7 @@ const ManageDonations = () => {
       <div className="space-y-4">
         {filteredDonations.map((donation) => (
           <div key={donation.id} className="bg-white p-4 rounded-lg shadow">
-            <div className="font-semibold">{donation.donor}</div>
+            <div className="font-semibold">Donor: {donation.donor}</div>
             <div className="text-sm text-gray-600">Item: {donation.item}</div>
             <div className="text-sm text-gray-600">Status: {donation.status}</div>
             <div className="text-sm text-gray-600">Date: {donation.date}</div>
