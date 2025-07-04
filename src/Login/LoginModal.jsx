@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
 import image from "../assets/login.avif";
+import api from "../../api/api";
 
 const LoginModal = () => {
   const navigate = useNavigate();
@@ -11,13 +12,7 @@ const LoginModal = () => {
   });
 
   const [errors, setErrors] = useState({});
-
-  // Fake user data for demonstration (Replace with API call)
-  const users = [
-    { email: "admin@example.com", password: "admin123", role: "admin" },
-    { email: "ngo@example.com", password: "ngo12345", role: "ngo" },
-    { email: "restaurant@example.com", password: "restaurant123", role: "restaurant" },
-  ];
+  const [isLoading, setIsLoading] = useState(false);
 
   const validate = () => {
     let newErrors = {};
@@ -34,35 +29,45 @@ const LoginModal = () => {
   };
 
   const handleChange = (e) => {
-    setLoginData({ ...loginData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      // Find user based on email and password
-      const user = users.find(
-        (u) => u.email === loginData.email && u.password === loginData.password
-      );
+    if (!validate()) return;
+    setIsLoading(true);
 
-      if (user) {
-        console.log("Login Successful:", user);
-        setErrors({});
+    try {
+      const { email, password } = loginData;
+      const { data } = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
-        // Redirect based on role
-        if (user.role === "admin") {
-          navigate("/Admin");
-        } else if (user.role === "ngo") {
-          navigate("/Ngo");
-        } else if (user.role === "restaurant") {
-          navigate("/Restaurant");
+      console.log(data);
+      if (data.success) {
+        if (data.user.userType === "ngo") {
+          navigate("/ngo");
+        } else if (data.user.userType === "restaurant") {
+          navigate("/restaurant");
+        } else if (data.user.userType === "admin") {
+          navigate("/admin");
+        } else {
+          alert("Invalid user type");
         }
       } else {
-        setErrors({
-          email: "Invalid credentials",
-          password: "Invalid credentials",
-        });
+        alert("Login failed. Please check your credentials.");
       }
+    } catch (error) {
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("An error occurred while logging in. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,10 +75,10 @@ const LoginModal = () => {
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${image})`, }}
+        style={{ backgroundImage: `url(${image})` }}
       ></div>
       <div className="relative">
-        <div className="border-3 border-red-500  bg-gradient-to-r from-orange-300 to-pink-500 text-white p-8 rounded-lg shadow-2xl w-96 relative transform transition-all duration-500 hover:scale-[1.03]">
+        <div className="border-3 border-red-400  bg-gradient-to-r from-orange-300 to-pink-500 text-white p-8 rounded-xl shadow-2xl w-96 h-96 relative transform transition-all duration-500 hover:scale-[1.03]">
           {/* Cross Icon */}
           <button
             className="absolute top-3 right-3 text-white hover:text-gray-200 cursor-pointer"
@@ -83,7 +88,7 @@ const LoginModal = () => {
           </button>
 
           <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
-          <form onSubmit={handleSubmit} action="/">
+          <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <input
                 type="email"
@@ -94,7 +99,9 @@ const LoginModal = () => {
                 onChange={handleChange}
               />
               {errors.email && (
-                <p className="text-red-500 font-semibold text-sm mt-1">{errors.email}</p>
+                <p className="text-red-500 font-semibold text-sm mt-1">
+                  {errors.email}
+                </p>
               )}
             </div>
 
@@ -108,18 +115,21 @@ const LoginModal = () => {
                 onChange={handleChange}
               />
               {errors.password && (
-                <p className="text-red-500 font-semibold text-sm mt-1">{errors.password}</p>
+                <p className="text-red-500 font-semibold text-sm mt-1">
+                  {errors.password}
+                </p>
               )}
             </div>
 
             <button
               type="submit"
-              className="w-full bg-pink-500 text-white p-2 mt-4 rounded-lg hover:bg-pink-600 transition-colors duration-300 cursor-pointer"
+              className="w-full bg-green-600 text-white p-2 mt-4 rounded-lg hover:bg-green-800 transition-colors duration-300 cursor-pointer"
+              disabled={isLoading}
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </button>
             <button
-              className="w-full bg-orange-500 text-white p-2 mt-2 rounded-lg hover:bg-orange-600 transition-colors duration-300 cursor-pointer"
+              className="w-full bg-red-600 text-white p-2 mt-2 rounded-lg hover:bg-red-800 transition-colors duration-300 cursor-pointer"
               onClick={() => navigate("/signup")}
             >
               Don't have an Account? Sign Up

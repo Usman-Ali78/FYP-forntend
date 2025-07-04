@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
 import image from "../assets/Signupimg.jpg";
+import api from "../../api/api";
+import { pre } from "framer-motion/client";
 
 const SignupModal = () => {
   const navigate = useNavigate();
@@ -11,12 +13,13 @@ const SignupModal = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-    userType: "donor",
+    userType: "restaurant",
     location: "",
     termsAccepted: false,
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const validate = () => {
     let newErrors = {};
@@ -55,22 +58,35 @@ const SignupModal = () => {
       ...signupData,
       [name]: type === "checkbox" ? checked : value,
     });
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validate()) {
-      console.log("Signup Data:", signupData);
-      setErrors({});
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+  setIsLoading(true);
 
-      // Redirect based on userType
-      if (signupData.userType === "donor") {
-        navigate("/Restaurant");
-      } else if (signupData.userType === "ngo") {
-        navigate("/Ngo");
-      }
+  try {
+    const { confirmPassword, ...payload } = signupData;
+
+    const { data } = await api.post("/auth/signup", {
+      ...payload,
+      confirmPassword,
+    });
+    
+    alert("Signup successful! Please log in to get started");
+    navigate("/login");
+  } catch (err) {
+    if (err.response?.data?.message) {
+      alert(err.response.data.message);
+    } else {
+      alert("Signup failed. Please try again.");
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -152,7 +168,7 @@ const SignupModal = () => {
                 value={signupData.userType}
                 onChange={handleChange}
               >
-                <option className="text-white bg-black" value="donor">
+                <option className="text-white bg-black" value="restaurant">
                   Donor
                 </option>
                 <option className="text-white bg-black" value="ngo">
@@ -228,11 +244,12 @@ const SignupModal = () => {
             <button
               type="submit"
               className="w-full bg-indigo-600 text-white p-2 mt-4 rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer"
+              disabled={isLoading}
             >
-              Register
+              {isLoading ? "Registering..." : "Register"}
             </button>
             <button
-              className="w-full bg-teal-700 text-white p-2 mt-2 rounded-lg hover:bg-teal-600 transition-colors cursor-pointer"
+              className="w-full bg-red-600 text-white p-2 mt-2 rounded-lg hover:bg-red-800 transition-colors cursor-pointer"
               onClick={() => navigate("/login")}
             >
               Already Have an Account? Log In
