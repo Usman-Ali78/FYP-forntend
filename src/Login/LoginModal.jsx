@@ -45,6 +45,7 @@ const LoginModal = () => {
         email,
         password,
       });
+      localStorage.setItem("token", data.token);
 
       console.log(data);
       if (data.success) {
