@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
 import image from "../assets/Signupimg.jpg";
 import api from "../../api/api";
-import { pre } from "framer-motion/client";
 
 const SignupModal = () => {
   const navigate = useNavigate();

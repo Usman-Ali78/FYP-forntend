@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
 import image from "../assets/login.avif";
 import api from "../../api/api";
+import { useAuth } from "../Context/authContext";
 
 const LoginModal = () => {
+  const {login} = useAuth()
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     email: "",
@@ -45,33 +47,38 @@ const LoginModal = () => {
         email,
         password,
       });
-      localStorage.setItem("token", data.token);
-
       console.log(data);
       if (data.success) {
-        if (data.user.userType === "ngo") {
-          navigate("/ngo");
-        } else if (data.user.userType === "restaurant") {
-          navigate("/restaurant");
-        } else if (data.user.userType === "admin") {
-          navigate("/admin");
-        } else {
-          alert("Invalid user type");
+        login(data.token, data.user.userType); // Using AuthContext's login
+
+        // Redirect based on userType
+        switch (data.user.userType) {
+          case "ngo":
+            navigate("/ngo");
+            break;
+          case "restaurant":
+            navigate("/restaurant");
+            break;
+          case "admin":
+            navigate("/admin");
+            break;
+          default:
+            navigate("/");
         }
       } else {
         alert("Login failed. Please check your credentials.");
       }
     } catch (error) {
-      if (error.response?.data?.message) {
-        alert(error.response.data.message);
-      } else {
-        alert("An error occurred while logging in. Please try again.");
-      }
+      const message =
+        error?.response?.data?.message || error.message || "Unexpected error";
+
+      console.log("Login error:", message);
+      alert("Login failed: " + message);
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div
