@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaEdit, FaTrash, FaSearch, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useDonations from "../../hooks/useDonations";
+import LoadingSpinner from "../LoadingSpinner";
 
 const allowedDonationItems = [
   "Buffet leftovers",
@@ -88,8 +89,7 @@ const Donations = () => {
     );
   }
 
-  if (loading)
-    return <div className="text-center py-8">Loading donations...</div>;
+  if (loading) return <LoadingSpinner />;
 
   if (error)
     return <div className="text-center py-8 text-red-500">{error}</div>;
@@ -137,13 +137,14 @@ const Donations = () => {
                 </span>
               </div>
               <p className="text-gray-600 mb-2">
-                Quantity: {donation.quantity}
+                Quantity: {donation.quantity}{donation.unit}
               </p>
               <p className="text-gray-500 text-sm mb-2">
                 📍 {donation.pickup_address}
               </p>
               <p className="text-gray-500 text-sm">
-                ⏳ {formatExpiryTime(donation.expiry_time)}
+                ⏳ {donation.status === "claimed" ? "Claimed" :formatExpiryTime(donation.expiry_time) }
+                {/* {formatExpiryTime(donation.expiry_time)} */}
               </p>
               {donation.ngo_id && (
                 <p className="text-gray-500 text-sm mt-2">
@@ -212,15 +213,32 @@ const Donations = () => {
               </div>
               <div>
                 <label className="block mb-1 text-gray-700">Quantity</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  min="1"
-                  value={formData.quantity}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  required
-                />
+                <div className="flex">
+                  <input
+                    type="number"
+                    name="quantity"
+                    min="1"
+                    value={formData.quantity}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    required
+                  />
+                  <select
+                    name="unit"
+                    value={formData.unit}
+                    onChange={handleChange}
+                    className="p-2 vorder border-gray-700 rounded-lg"
+                  >
+                    <option value="kg">Kg</option>
+                    <option value="litre">Litre</option>
+                    <option value="pieces">Pieces</option>
+                    <option value="packets">Packets</option>
+                    <option value="boxes">Boxes</option>
+                    <option value="bottles">Bottles</option>
+                    <option value="grams">Grams</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="block mb-1 text-gray-700">Expiry Time</label>

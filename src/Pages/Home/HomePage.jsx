@@ -1,8 +1,8 @@
 import React from "react";
-import mainImage from "../assets/MainPage.jpg";
-import image1 from "../assets/Needy1.jfif";
-import image2 from "../assets/Needy2.jfif";
-import image3 from "../assets/Needy3.jfif";
+import mainImage from "../../assets/MainPage.jpg";
+import image1 from "../../assets/Needy1.jfif"
+import image2 from "../../assets/Needy2.jfif"
+import image3 from "../../assets/Needy3.jfif"
 import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {

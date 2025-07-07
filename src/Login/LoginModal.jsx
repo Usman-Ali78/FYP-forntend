@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
-import image from "../assets/login.avif";
+import image from "../assets/signupform.jpg";
 import api from "../../api/api";
 import { useAuth } from "../Context/authContext";
 
 const LoginModal = () => {
-  const {login} = useAuth()
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     email: "",
@@ -78,72 +78,77 @@ const LoginModal = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${image})` }}
-      ></div>
-      <div className="relative">
-        <div className="border-3 border-red-400  bg-gradient-to-r from-orange-300 to-pink-500 text-white p-8 rounded-xl shadow-2xl w-96 h-96 relative transform transition-all duration-500 hover:scale-[1.03]">
-          {/* Cross Icon */}
+      {/* Background Image + Overlay */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className="w-full h-full bg-center blur-[2px] brightness-75"
+          style={{ 
+            backgroundImage: `url(${image})`,
+            backgroundSize: "cover",
+          }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60"></div>
+      </div>
+
+      {/* Glassmorphic Login Card */}
+      <div className="relative z-10 w-96 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl p-8 text-white">
+        {/* Cross Icon */}
+        <button
+          className="absolute top-3 right-3 text-white hover:text-gray-300 transition"
+          onClick={() => navigate("/")}
+        >
+          <FaTimes className="w-6 h-6" />
+        </button>
+
+        <h2 className="text-3xl font-semibold mb-6 text-center">Login</h2>
+
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-400"
+              value={loginData.email}
+              onChange={handleChange}
+            />
+            {errors.email && (
+              <p className="text-red-400 text-sm font-medium">{errors.email}</p>
+            )}
+
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-400"
+              value={loginData.password}
+              onChange={handleChange}
+            />
+            {errors.password && (
+              <p className="text-red-400 text-sm font-medium">
+                {errors.password}
+              </p>
+            )}
+          </div>
+
           <button
-            className="absolute top-3 right-3 text-white hover:text-gray-200 cursor-pointer"
-            onClick={() => navigate("/")}
+            type="submit"
+            className="mt-6 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 transition-colors font-semibold cursor-pointer"
+            disabled={isLoading}
           >
-            <FaTimes className="w-6 h-6" />
+            {isLoading ? "Logging in..." : "Login"}
           </button>
 
-          <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="w-full p-2 border border-gray-200 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors duration-300"
-                value={loginData.email}
-                onChange={handleChange}
-              />
-              {errors.email && (
-                <p className="text-red-500 font-semibold text-sm mt-1">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="w-full p-2 border border-gray-200 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors duration-300"
-                value={loginData.password}
-                onChange={handleChange}
-              />
-              {errors.password && (
-                <p className="text-red-500 font-semibold text-sm mt-1">
-                  {errors.password}
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-green-600 text-white p-2 mt-4 rounded-lg hover:bg-green-800 transition-colors duration-300 cursor-pointer"
-              disabled={isLoading}
-            >
-              {isLoading ? "Logging in..." : "Login"}
-            </button>
-            <button
-              className="w-full bg-red-600 text-white p-2 mt-2 rounded-lg hover:bg-red-800 transition-colors duration-300 cursor-pointer"
-              onClick={() => navigate("/signup")}
-            >
-              Don't have an Account? Sign Up
-            </button>
-          </form>
-        </div>
+          <button
+            className="mt-3 w-full py-3 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white cursor-pointer"
+            onClick={() => navigate("/signup")}
+          >
+            Don't have an Account? Sign Up
+          </button>
+        </form>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
-import image from "../assets/Signupimg.jpg";
+import image from "../assets/register.jpg";
 import api from "../../api/api";
 
 const SignupModal = () => {
@@ -60,201 +60,174 @@ const SignupModal = () => {
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) return;
-  setIsLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setIsLoading(true);
 
-  try {
-    const { confirmPassword, ...payload } = signupData;
+    try {
+      const { confirmPassword, ...payload } = signupData;
 
-    const { data } = await api.post("/auth/signup", {
-      ...payload,
-      confirmPassword,
-    });
-    
-    alert("Signup successful! Please log in to get started");
-    navigate("/login");
-  } catch (err) {
-    if (err.response?.data?.message) {
-      alert(err.response.data.message);
-    } else {
-      alert("Signup failed. Please try again.");
+      const { data } = await api.post("/auth/signup", {
+        ...payload,
+        confirmPassword,
+      });
+
+      alert("Signup successful! Please log in to get started");
+      navigate("/login");
+    } catch (err) {
+      if (err.response?.data?.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Signup failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black"
-        style={{
-          backgroundImage: `url(${image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          opacity: 0.94,
-        }}
-      ></div>
-      <div className="relative flex items-center justify-center">
-        <div className=" border-3 border-amber-200  bg-gradient-to-r from-teal-500 to-indigo-500 duration-500 text-white p-8 rounded-lg shadow-2xl w-96 relative transform transition-transform hover:scale-[1.02]">
-          {/* Cross Icon */}
-          <button
-            className="absolute top-3 right-3 text-white hover:text-gray-200 cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            <FaTimes className="w-6 h-6" />
-          </button>
+      {/* Background image and gradient overlay */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className="w-full h-full bg-cover bg-center blur-[2px] brightness-75 transition-all duration-500"
+          style={{ backgroundImage: `url(${image})` }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60"></div>
+      </div>
 
-          <h2 className="text-3xl font-bold mb-6 text-center">Sign Up</h2>
+      {/* Glassmorphic Form Card */}
+      <div className="relative z-10 w-96 rounded-2xl border  backdrop-blur-md shadow-2xl p-8 text-white">
+        {/* Cross Icon */}
+        <button
+          className="absolute top-3 right-3 text-white hover:text-gray-300 transition"
+          onClick={() => navigate("/")}
+        >
+          <FaTimes className="w-6 h-6" />
+        </button>
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name / Business Name"
-                className="w-full p-2 border border-gray-300 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={signupData.name}
-                onChange={handleChange}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1 font-semibold">
-                  {errors.name}
-                </p>
-              )}
-            </div>
+        <h2 className="text-3xl font-semibold mb-6 text-center">Sign Up</h2>
 
-            <div className="mb-4">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="w-full p-2 border border-gray-300 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={signupData.email}
-                onChange={handleChange}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1 font-semibold">
-                  {errors.email}
-                </p>
-              )}
-            </div>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name / Business Name"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              value={signupData.name}
+              onChange={handleChange}
+            />
+            {errors.name && (
+              <p className="text-red-400 text-sm">{errors.name}</p>
+            )}
 
-            <div className="mb-4">
-              <input
-                type="text"
-                name="phone"
-                placeholder="Phone Number"
-                className="w-full p-2 border border-gray-300 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={signupData.phone}
-                onChange={handleChange}
-              />
-              {errors.phone && (
-                <p className="text-red-500 text-sm mt-1 font-semibold">
-                  {errors.phone}
-                </p>
-              )}
-            </div>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              value={signupData.email}
+              onChange={handleChange}
+            />
+            {errors.email && (
+              <p className="text-red-400 text-sm">{errors.email}</p>
+            )}
 
-            <div className="mb-4">
-              <select
-                name="userType"
-                className="w-full p-2 border border-gray-300 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={signupData.userType}
-                onChange={handleChange}
-              >
-                <option className="text-white bg-black" value="restaurant">
-                  Donor
-                </option>
-                <option className="text-white bg-black" value="ngo">
-                  NGO
-                </option>
-              </select>
-            </div>
+            <input
+              type="text"
+              name="phone"
+              placeholder="Phone Number"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              value={signupData.phone}
+              onChange={handleChange}
+            />
+            {errors.phone && (
+              <p className="text-red-400 text-sm">{errors.phone}</p>
+            )}
 
-            <div className="mb-4">
-              <input
-                type="text"
-                name="location"
-                placeholder="Location"
-                className="w-full p-2 border border-gray-300 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={signupData.location}
-                onChange={handleChange}
-              />
-              {errors.location && (
-                <p className="text-red-500 text-sm mt-1 font-semibold">
-                  {errors.location}
-                </p>
-              )}
-            </div>
+            <select
+              name="userType"
+              className="w-full p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              value={signupData.userType}
+              onChange={handleChange}
+            >
+              <option className="text-black" value="restaurant">
+                Donor
+              </option>
+              <option className="text-black" value="ngo">
+                NGO
+              </option>
+            </select>
 
-            <div className="mb-4">
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="w-full p-2 border border-gray-300 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={signupData.password}
-                onChange={handleChange}
-              />
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1 font-semibold">
-                  {errors.password}
-                </p>
-              )}
-            </div>
+            <input
+              type="text"
+              name="location"
+              placeholder="Location"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              value={signupData.location}
+              onChange={handleChange}
+            />
+            {errors.location && (
+              <p className="text-red-400 text-sm">{errors.location}</p>
+            )}
 
-            <div className="mb-4">
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                className="w-full p-2 border border-gray-300 rounded-lg placeholder-gray-200 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={signupData.confirmPassword}
-                onChange={handleChange}
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1 font-semibold">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              value={signupData.password}
+              onChange={handleChange}
+            />
+            {errors.password && (
+              <p className="text-red-400 text-sm">{errors.password}</p>
+            )}
 
-            <div className="mb-4 flex items-center">
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              value={signupData.confirmPassword}
+              onChange={handleChange}
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-400 text-sm">{errors.confirmPassword}</p>
+            )}
+
+            <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 name="termsAccepted"
-                className="mr-2"
+                className="accent-amber-400"
                 checked={signupData.termsAccepted}
                 onChange={handleChange}
               />
-              <label>I accept the terms and conditions</label>
+              <label className="text-sm">
+                I accept the terms and conditions
+              </label>
             </div>
             {errors.termsAccepted && (
-              <p className="text-red-500 text-sm mt-1 font-semibold">
-                {errors.termsAccepted}
-              </p>
+              <p className="text-red-400 text-sm">{errors.termsAccepted}</p>
             )}
+          </div>
 
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white p-2 mt-4 rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer"
-              disabled={isLoading}
-            >
-              {isLoading ? "Registering..." : "Register"}
-            </button>
-            <button
-              className="w-full bg-red-600 text-white p-2 mt-2 rounded-lg hover:bg-red-800 transition-colors cursor-pointer"
-              onClick={() => navigate("/login")}
-            >
-              Already Have an Account? Log In
-            </button>
-          </form>
-        </div>
+          <button
+            type="submit"
+            className="mt-6 w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition-colors font-semibold cursor-pointer"
+            disabled={isLoading}
+          >
+            {isLoading ? "Registering..." : "Register"}
+          </button>
+          <button
+            className="mt-3 w-full py-3 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white cursor-pointer"
+            onClick={() => navigate("/login")}
+          >
+            Already Have an Account? Log In
+          </button>
+        </form>
       </div>
     </div>
   );

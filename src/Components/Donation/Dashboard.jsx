@@ -1,18 +1,48 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import useDonations from "../../hooks/useDonations";
+import api from "../../../api/api";
 
 const Dashboard = () => {
+  const [totalDonations, setTotalDonations] = useState({
+    total: 0,
+    available: 0,
+    claimed: 0,
+    pending_pickup: 0,
+    delivered: 0,
+  });
+  // const {activity , setActivity} = useState([])
+
+  useEffect(() => {
+    const fetchTotalDonations = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await api.get("/donation/my-total", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setTotalDonations(data);
+      } catch (error) {
+        console.error("Error fetching total donations:", error);
+      }
+    };
+
+    fetchTotalDonations();
+  }, []);
+
+
   const recentActivity = [
     {
       id: 1,
       type: "Donation",
-      description: "10 Pizzas donated to NGO XYZ",
+      description: "5 kg of rice donated",
       time: "2 hours ago",
     },
     {
       id: 2,
       type: "Pickup",
-      description: "5 Salads picked up by NGO ABC",
-      time: "4 hours ago",
+      description: "Scheduled pickup for 10 kg of vegetables",
+      time: "1 day ago",
     },
   ];
 
@@ -21,13 +51,16 @@ const Dashboard = () => {
       <h2 className="text-2xl font-bold mb-4">Dashboard Overview</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-5 shadow rounded-xl">
-          📦 Total Donations: 120
+          📦 Total Donations: {totalDonations.total}
         </div>
         <div className="bg-white p-5 shadow rounded-xl">
-          🚚 Pending Pickups: 5
+          🚚 Pending Pickups: {totalDonations.pending_pickup}
         </div>
         <div className="bg-white p-5 shadow rounded-xl">
-          🌍 Impact: 250 Meals Served
+          🌍 Cliamed: {totalDonations.claimed}
+        </div>
+        <div className="bg-white p-5 shadow rounded-xl">
+          🌍 Availaible Donations: {totalDonations.available}
         </div>
       </div>
       <div className="bg-white p-5 shadow rounded-xl mb-6">

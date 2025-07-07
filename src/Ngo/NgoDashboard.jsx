@@ -112,8 +112,8 @@ function NgoDashboard() {
                 filteredDonations.map((donation) => (
                   <div key={donation._id} className="bg-white p-4 rounded shadow hover:shadow-md transition">
                     <h3 className="font-bold text-lg text-blue-700">{donation.item}</h3>
-                    <p className="text-sm text-gray-600">Donor: {donation.donor?.name || "N/A"}</p>
-                    <p className="text-sm">Quantity: {donation.quantity}</p>
+                    <p className="text-sm text-gray-600">Donor Name: {donation.donor?.name || "N/A"}</p>
+                    <p className="text-sm">Quantity: {donation.quantity}{donation.unit}</p>
                     <p className="text-sm">
                       Location: {donation.pickup_address} <FaMapMarkerAlt className="inline" />
                     </p>
@@ -152,10 +152,10 @@ function NgoDashboard() {
                     className="bg-green-100 p-4 rounded shadow border-l-4 border-green-500 hover:shadow-md"
                   >
                     <p className="font-semibold flex items-center gap-2">
-                      <FaClipboardCheck /> Donor: {donation.donor?.name || "N/A"}
+                      <FaClipboardCheck /> Donor Name: {donation.donor?.name || "N/A"}
                     </p>
                     <p>Item: {donation.item}</p>
-                    <p>Quantity: {donation.quantity}</p>
+                    <p>Quantity: {donation.quantity}{donation.unit}</p>
                     <p>Claimed At: {new Date(donation.claimedAt).toLocaleString()}</p>
                   </div>
                 ))

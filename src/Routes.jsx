@@ -3,9 +3,9 @@ import App from "./App.jsx";
 import ProtectedRoute from "./Components/ProtectedRoute.jsx";
 
 // Lazy-loaded components
-const HomePage = lazy(() => import("./Home/HomePage.jsx"));
-const ContactUs = lazy(() => import("./ContactUs/ContactUs.jsx"));
-const About = lazy(() => import("./About/About.jsx"));
+const HomePage = lazy(() => import("./Pages/Home/HomePage.jsx"));
+const ContactUs = lazy(() => import("./Pages/ContactUs/ContactUs.jsx"));
+const About = lazy(() => import("./Pages/About/About.jsx"));
 const AdminDashboard = lazy(() => import("./Admin/AdminDashboard.jsx"));
 const RestaurantDashboard = lazy(() =>
   import("./Restaurant/RestaurantDashboard.jsx")
