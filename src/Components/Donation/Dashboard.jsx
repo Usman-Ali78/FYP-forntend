@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import useDonations from "../../hooks/useDonations";
 import api from "../../../api/api";
 
 const Dashboard = () => {
@@ -10,8 +9,6 @@ const Dashboard = () => {
     pending_pickup: 0,
     delivered: 0,
   });
-  // const {activity , setActivity} = useState([])
-
   useEffect(() => {
     const fetchTotalDonations = async () => {
       try {
@@ -21,6 +18,8 @@ const Dashboard = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log(data);
+        
         setTotalDonations(data);
       } catch (error) {
         console.error("Error fetching total donations:", error);
@@ -57,10 +56,7 @@ const Dashboard = () => {
           🚚 Pending Pickups: {totalDonations.pending_pickup}
         </div>
         <div className="bg-white p-5 shadow rounded-xl">
-          🌍 Cliamed: {totalDonations.claimed}
-        </div>
-        <div className="bg-white p-5 shadow rounded-xl">
-          🌍 Availaible Donations: {totalDonations.available}
+          🌍 Available Donations: {totalDonations.available}
         </div>
       </div>
       <div className="bg-white p-5 shadow rounded-xl mb-6">
@@ -78,10 +74,6 @@ const Dashboard = () => {
       <div className="bg-white p-5 shadow rounded-xl mb-6">
         <h3 className="text-xl font-semibold mb-4">Impact Metrics</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-green-100 rounded-lg">
-            <p className="text-lg font-semibold">🌍 CO2 Reduced</p>
-            <p className="text-2xl">500 kg</p>
-          </div>
           <div className="p-4 bg-blue-100 rounded-lg">
             <p className="text-lg font-semibold">🍴 Meals Served</p>
             <p className="text-2xl">1,200</p>

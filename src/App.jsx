@@ -4,6 +4,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Footer from "./Components/Footer";
 import LoginModal from "./Login/LoginModal";
 import SignupModal from "./Signup/SignupModal";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const location = useLocation();
@@ -27,6 +28,16 @@ function App() {
       {!hideHeaderFooter && <Footer />}
       {location.pathname === "/LogIn" && <LoginModal />}
       {location.pathname === "/SignUp" && <SignupModal/>}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+      />
     </>
   );
 }

@@ -6,6 +6,7 @@ import Routes from "./Routes";
 import LoadingSpinner from "./Components/LoadingSpinner";
 import { AuthProvider } from "./Context/authContext.jsx";
 
+
 const router = createBrowserRouter(Routes);
 
 createRoot(document.getElementById("root")).render(

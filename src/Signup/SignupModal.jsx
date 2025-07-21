@@ -9,12 +9,17 @@ const SignupModal = () => {
   const [signupData, setSignupData] = useState({
     name: "",
     email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
-    userType: "restaurant",
-    location: "",
-    termsAccepted: false,
+    userType: "",
+    ngo_name: "",
+    registration_number: "",
+    ngo_phone: "",
+    ngo_location: "",
+    restaurant_name: "",
+    license_number: "",
+    restaurant_phone: "",
+    restaurant_location: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -31,8 +36,8 @@ const SignupModal = () => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupData.email)) {
       newErrors.email = "Invalid email format";
     }
-    if (!signupData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+    if (!signupData.userType) {
+      newErrors.userType = "User type is required";
     }
     if (signupData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters";
@@ -40,11 +45,40 @@ const SignupModal = () => {
     if (signupData.confirmPassword !== signupData.password) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-    if (!signupData.location.trim()) {
-      newErrors.location = "Location is required";
+    // NGO specific validation
+    if (signupData.userType === "ngo") {
+      if (!signupData.ngo_name.trim()) {
+        newErrors.ngo_name = "Ngo name is required";
+      }
+      if (!signupData.registration_number.trim()) {
+        newErrors.registration_number = "Registration number is required";
+      }
+      if (!signupData.ngo_phone.trim()) {
+        newErrors.ngo_phone = "Phone number is required";
+      } else if (!/^[0-9]{10,15}$/.test(signupData.ngo_phone)) {
+        newErrors.ngo_phone = "Invalid phone number format";
+      }
+      if (!signupData.ngo_location.trim()) {
+        newErrors.ngo_location = "Location is required";
+      }
     }
-    if (!signupData.termsAccepted) {
-      newErrors.termsAccepted = "You must accept the terms and conditions";
+
+    // Restaurant specific validation
+    if (signupData.userType === "restaurant") {
+      if (!signupData.restaurant_name.trim()) {
+        newErrors.restaurant_name = "Restaurant name is required";
+      }
+      if (!signupData.license_number.trim()) {
+        newErrors.license_number = "License number is required";
+      }
+      if (!signupData.restaurant_phone.trim()) {
+        newErrors.restaurant_phone = "Phone number is required";
+      } else if (!/^[0-9]{10,15}$/.test(signupData.restaurant_phone)) {
+        newErrors.restaurant_phone = "Invalid phone number format";
+      }
+      if (!signupData.restaurant_location.trim()) {
+        newErrors.restaurant_location = "Location is required";
+      }
     }
 
     setErrors(newErrors);
@@ -114,7 +148,7 @@ const SignupModal = () => {
             <input
               type="text"
               name="name"
-              placeholder="Full Name / Business Name"
+              placeholder="User Name"
               className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
               value={signupData.name}
               onChange={handleChange}
@@ -122,7 +156,6 @@ const SignupModal = () => {
             {errors.name && (
               <p className="text-red-400 text-sm">{errors.name}</p>
             )}
-
             <input
               type="email"
               name="email"
@@ -134,45 +167,129 @@ const SignupModal = () => {
             {errors.email && (
               <p className="text-red-400 text-sm">{errors.email}</p>
             )}
-
-            <input
-              type="text"
-              name="phone"
-              placeholder="Phone Number"
-              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              value={signupData.phone}
-              onChange={handleChange}
-            />
-            {errors.phone && (
-              <p className="text-red-400 text-sm">{errors.phone}</p>
-            )}
-
             <select
               name="userType"
               className="w-full p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
               value={signupData.userType}
               onChange={handleChange}
+              required
             >
-              <option className="text-black" value="restaurant">
-                Donor
-              </option>
-              <option className="text-black" value="ngo">
-                NGO
-              </option>
+              <option className=" bg-gray-900" value="">Select User Type</option>
+              <option className=" bg-gray-900" value="restaurant">Donor</option>
+              <option className=" bg-gray-900" value="ngo">NGO</option>
             </select>
-
-            <input
-              type="text"
-              name="location"
-              placeholder="Location"
-              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              value={signupData.location}
-              onChange={handleChange}
-            />
-            {errors.location && (
-              <p className="text-red-400 text-sm">{errors.location}</p>
+            {errors.userType && (
+              <p className="text-red-400 text-sm">{errors.userType}</p>
             )}
 
+            {signupData.userType === "ngo" && (
+              <>
+                <input
+                  type="text"
+                  name="ngo_name"
+                  placeholder="Ngo Name"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.ngo_name}
+                  onChange={handleChange}
+                />
+                {errors.ngo_name && (
+                  <p className="text-red-400 text-sm">
+                    {errors.ngo_name}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  name="registration_number"
+                  placeholder="Registration Number"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.registration_number}
+                  onChange={handleChange}
+                />
+                {errors.registration_number && (
+                  <p className="text-red-400 text-sm">
+                    {errors.registration_number}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  name="ngo_phone"
+                  placeholder="Phone Number"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.ngo_phone}
+                  onChange={handleChange}
+                />
+                {errors.ngo_phone && (
+                  <p className="text-red-400 text-sm">{errors.ngo_phone}</p>
+                )}
+                <input
+                  type="text"
+                  name="ngo_location"
+                  placeholder="Ngo Location"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.ngo_location}
+                  onChange={handleChange}
+                />
+                {errors.ngo_location && (
+                  <p className="text-red-400 text-sm">{errors.ngo_location}</p>
+                )}
+              </>
+            )}
+            {signupData.userType === "restaurant" && (
+              <>
+                <input
+                  type="text"
+                  name="restaurant_name"
+                  placeholder="Restaurant Name"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.restaurant_name}
+                  onChange={handleChange}
+                />
+                {errors.restaurant_name && (
+                  <p className="text-red-400 text-sm">
+                    {errors.restaurant_name}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  name="license_number"
+                  placeholder="License Number"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.license_number}
+                  onChange={handleChange}
+                />
+                {errors.license_number && (
+                  <p className="text-red-400 text-sm">
+                    {errors.license_number}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  name="restaurant_phone"
+                  placeholder="Phone Number"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.restaurant_phone}
+                  onChange={handleChange}
+                />
+                {errors.restaurant_phone && (
+                  <p className="text-red-400 text-sm">
+                    {errors.restaurant_phone}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  name="restaurant_location"
+                  placeholder="Restaurant Location"
+                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  value={signupData.restaurant_location}
+                  onChange={handleChange}
+                />
+                {errors.restaurant_location && (
+                  <p className="text-red-400 text-sm">
+                    {errors.restaurant_location}
+                  </p>
+                )}
+              </>
+            )}
             <input
               type="password"
               name="password"
@@ -184,7 +301,6 @@ const SignupModal = () => {
             {errors.password && (
               <p className="text-red-400 text-sm">{errors.password}</p>
             )}
-
             <input
               type="password"
               name="confirmPassword"
@@ -195,22 +311,6 @@ const SignupModal = () => {
             />
             {errors.confirmPassword && (
               <p className="text-red-400 text-sm">{errors.confirmPassword}</p>
-            )}
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="termsAccepted"
-                className="accent-amber-400"
-                checked={signupData.termsAccepted}
-                onChange={handleChange}
-              />
-              <label className="text-sm">
-                I accept the terms and conditions
-              </label>
-            </div>
-            {errors.termsAccepted && (
-              <p className="text-red-400 text-sm">{errors.termsAccepted}</p>
             )}
           </div>
 
