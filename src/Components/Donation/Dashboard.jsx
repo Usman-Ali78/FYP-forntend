@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../api/api";
+import { ul } from "framer-motion/client";
 
 const Dashboard = () => {
+  const [activity, setActivity] = useState([]);
   const [totalDonations, setTotalDonations] = useState({
     total: 0,
     available: 0,
@@ -9,41 +11,69 @@ const Dashboard = () => {
     pending_pickup: 0,
     delivered: 0,
   });
-  useEffect(() => {
-    const fetchTotalDonations = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const { data } = await api.get("/donation/my-total", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log(data);
-        
-        setTotalDonations(data);
-      } catch (error) {
-        console.error("Error fetching total donations:", error);
-      }
-    };
 
+  const fetchTotalDonations = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await api.get("/donation/my-total", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTotalDonations(data);
+    } catch (error) {
+      console.error("Error fetching total donations:", error);
+    }
+  };
+
+  const fetchActivities = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await api.get("/activity/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(data);
+      setActivity(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
     fetchTotalDonations();
+    fetchActivities();
   }, []);
 
+  const isWithinLast24Hours = (timestamp) => {
+  const createdAt = new Date(timestamp);
+  const now = new Date();
+  const diffInHours = (now - createdAt) / (1000 * 60 * 60);
+  return diffInHours <= 24;
+};
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "Donation",
-      description: "5 kg of rice donated",
-      time: "2 hours ago",
-    },
-    {
-      id: 2,
-      type: "Pickup",
-      description: "Scheduled pickup for 10 kg of vegetables",
-      time: "1 day ago",
-    },
-  ];
+const filteredActivities = activity.filter((activity) => {
+  const message = activity.message?.toLowerCase() || "";
+  const status = activity.relatedDonation?.status;
+  const createdAt = activity.createdAt;
+
+  // Only show if within last 24 hours
+  if (!isWithinLast24Hours(createdAt)) return false;
+
+  //Always show if it's a donation being added
+  if (message.startsWith("you added")) return true;
+
+  //Always show if it's requested by NGO
+  if (message.includes("requested your donation")) return true;
+
+  //Always show if it's marked as delivered
+  if (message.includes("marked your donation") && status === "delivered") return true;
+
+  //Otherwise don't show
+  return false;
+});
+
+
 
   return (
     <div>
@@ -62,27 +92,19 @@ const Dashboard = () => {
       <div className="bg-white p-5 shadow rounded-xl mb-6">
         <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
         <ul className="space-y-2">
-          {recentActivity.map((activity) => (
-            <li key={activity.id} className="p-3 bg-gray-100 rounded">
-              <span className="font-semibold">{activity.type}:</span>{" "}
-              {activity.description}{" "}
-              <span className="text-gray-500">{activity.time}</span>
-            </li>
-          ))}
+          {filteredActivities.length > 0 ? (
+            filteredActivities.map((activity, key) => (
+              <li key={activity._id} className="p-3 bg-gray-100 rounded">
+                <span className="font-semibold">{activity.message}</span>
+                <span className="text-gray-500">
+                  - {new Date(activity.createdAt).toLocaleDateString()}
+                </span>
+              </li>
+            ))
+          ) : (
+            <li className="text-gray-500">No recent activity to show.</li>
+          )}
         </ul>
-      </div>
-      <div className="bg-white p-5 shadow rounded-xl mb-6">
-        <h3 className="text-xl font-semibold mb-4">Impact Metrics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-blue-100 rounded-lg">
-            <p className="text-lg font-semibold">🍴 Meals Served</p>
-            <p className="text-2xl">1,200</p>
-          </div>
-          <div className="p-4 bg-yellow-100 rounded-lg">
-            <p className="text-lg font-semibold">🚮 Food Waste Saved</p>
-            <p className="text-2xl">750 kg</p>
-          </div>
-        </div>
       </div>
     </div>
   );

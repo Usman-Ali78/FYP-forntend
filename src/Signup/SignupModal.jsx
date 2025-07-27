@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
 import image from "../assets/register.jpg";
 import api from "../../api/api";
+import { toast } from "react-toastify";
 
 const SignupModal = () => {
   const navigate = useNavigate();
@@ -96,7 +97,10 @@ const SignupModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      toast.error("Please fix form errors before Submitting");
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -107,13 +111,15 @@ const SignupModal = () => {
         confirmPassword,
       });
 
-      alert("Signup successful! Please log in to get started");
-      navigate("/login");
+      toast.success("Signup successful! Redirecting to login.....");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (err) {
       if (err.response?.data?.message) {
-        alert(err.response.data.message);
+        toast.error(err.response.data.message);
       } else {
-        alert("Signup failed. Please try again.");
+        toast.error("Signup failed. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -121,7 +127,7 @@ const SignupModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       {/* Background image and gradient overlay */}
       <div className="absolute inset-0 z-0">
         <div
@@ -132,7 +138,7 @@ const SignupModal = () => {
       </div>
 
       {/* Glassmorphic Form Card */}
-      <div className="relative z-10 w-96 rounded-2xl border  backdrop-blur-md shadow-2xl p-8 text-white">
+      <div className="relative z-10 w-full max-w-[350px] max-h-[90vh] rounded-2xl border backdrop-blur-md shadow-2xl p-6 text-white overflow-y-auto">
         {/* Cross Icon */}
         <button
           className="absolute top-3 right-3 text-white hover:text-gray-300 transition"
@@ -141,188 +147,194 @@ const SignupModal = () => {
           <FaTimes className="w-6 h-6" />
         </button>
 
-        <h2 className="text-3xl font-semibold mb-6 text-center">Sign Up</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-center">Sign Up</h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-3">
             <input
               type="text"
               name="name"
               placeholder="User Name"
-              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
               value={signupData.name}
               onChange={handleChange}
             />
             {errors.name && (
-              <p className="text-red-400 text-sm">{errors.name}</p>
+              <p className="text-red-400 text-[14px]">{errors.name}</p>
             )}
+            
             <input
               type="email"
               name="email"
               placeholder="Email"
-              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
               value={signupData.email}
               onChange={handleChange}
             />
             {errors.email && (
-              <p className="text-red-400 text-sm">{errors.email}</p>
+              <p className="text-red-400 text-[14px]">{errors.email}</p>
             )}
+            
             <select
               name="userType"
-              className="w-full p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              className="w-full p-2 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
               value={signupData.userType}
               onChange={handleChange}
               required
             >
-              <option className=" bg-gray-900" value="">Select User Type</option>
-              <option className=" bg-gray-900" value="restaurant">Donor</option>
-              <option className=" bg-gray-900" value="ngo">NGO</option>
+              <option className="bg-gray-900" value="">
+                Select User Type
+              </option>
+              <option className="bg-gray-900" value="restaurant">
+                Donor
+              </option>
+              <option className="bg-gray-900" value="ngo">
+                NGO
+              </option>
             </select>
             {errors.userType && (
-              <p className="text-red-400 text-sm">{errors.userType}</p>
+              <p className="text-red-400 text-[14px]">{errors.userType}</p>
             )}
 
             {signupData.userType === "ngo" && (
-              <>
+              <div className="space-y-3">
                 <input
                   type="text"
                   name="ngo_name"
                   placeholder="Ngo Name"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.ngo_name}
                   onChange={handleChange}
                 />
                 {errors.ngo_name && (
-                  <p className="text-red-400 text-sm">
-                    {errors.ngo_name}
-                  </p>
+                  <p className="text-red-400 text-[14px]">{errors.ngo_name}</p>
                 )}
+                
                 <input
                   type="text"
                   name="registration_number"
                   placeholder="Registration Number"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.registration_number}
                   onChange={handleChange}
                 />
                 {errors.registration_number && (
-                  <p className="text-red-400 text-sm">
-                    {errors.registration_number}
-                  </p>
+                  <p className="text-red-400 text-[14px]">{errors.registration_number}</p>
                 )}
+                
                 <input
                   type="text"
                   name="ngo_phone"
                   placeholder="Phone Number"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.ngo_phone}
                   onChange={handleChange}
                 />
                 {errors.ngo_phone && (
-                  <p className="text-red-400 text-sm">{errors.ngo_phone}</p>
+                  <p className="text-red-400 text-[14px]">{errors.ngo_phone}</p>
                 )}
+                
                 <input
                   type="text"
                   name="ngo_location"
                   placeholder="Ngo Location"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.ngo_location}
                   onChange={handleChange}
                 />
                 {errors.ngo_location && (
-                  <p className="text-red-400 text-sm">{errors.ngo_location}</p>
+                  <p className="text-red-400 text-[14px]">{errors.ngo_location}</p>
                 )}
-              </>
+              </div>
             )}
+            
             {signupData.userType === "restaurant" && (
-              <>
+              <div className="space-y-3">
                 <input
                   type="text"
                   name="restaurant_name"
                   placeholder="Restaurant Name"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.restaurant_name}
                   onChange={handleChange}
                 />
                 {errors.restaurant_name && (
-                  <p className="text-red-400 text-sm">
-                    {errors.restaurant_name}
-                  </p>
+                  <p className="text-red-400 text-[14px]">{errors.restaurant_name}</p>
                 )}
+                
                 <input
                   type="text"
                   name="license_number"
-                  placeholder="License Number"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  placeholder="Registration Number"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.license_number}
                   onChange={handleChange}
                 />
                 {errors.license_number && (
-                  <p className="text-red-400 text-sm">
-                    {errors.license_number}
-                  </p>
+                  <p className="text-red-400 text-[14px]">{errors.license_number}</p>
                 )}
+                
                 <input
                   type="text"
                   name="restaurant_phone"
                   placeholder="Phone Number"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.restaurant_phone}
                   onChange={handleChange}
                 />
                 {errors.restaurant_phone && (
-                  <p className="text-red-400 text-sm">
-                    {errors.restaurant_phone}
-                  </p>
+                  <p className="text-red-400 text-[14px]">{errors.restaurant_phone}</p>
                 )}
+                
                 <input
                   type="text"
                   name="restaurant_location"
                   placeholder="Restaurant Location"
-                  className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
                   value={signupData.restaurant_location}
                   onChange={handleChange}
                 />
                 {errors.restaurant_location && (
-                  <p className="text-red-400 text-sm">
-                    {errors.restaurant_location}
-                  </p>
+                  <p className="text-red-400 text-[14px]">{errors.restaurant_location}</p>
                 )}
-              </>
+              </div>
             )}
+            
             <input
               type="password"
               name="password"
               placeholder="Password"
-              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
               value={signupData.password}
               onChange={handleChange}
             />
             {errors.password && (
-              <p className="text-red-400 text-sm">{errors.password}</p>
+              <p className="text-red-400 text-[14px]">{errors.password}</p>
             )}
+            
             <input
               type="password"
               name="confirmPassword"
               placeholder="Confirm Password"
-              className="w-full p-3 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              className="w-full p-2 rounded-lg bg-white/10 placeholder-white/70 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300"
               value={signupData.confirmPassword}
               onChange={handleChange}
             />
             {errors.confirmPassword && (
-              <p className="text-red-400 text-sm">{errors.confirmPassword}</p>
+              <p className="text-red-400 text-[14px]">{errors.confirmPassword}</p>
             )}
           </div>
 
           <button
             type="submit"
-            className="mt-6 w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 transition-colors font-semibold cursor-pointer"
+            className="mt-4 w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 transition-colors font-semibold cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? "Registering..." : "Register"}
           </button>
           <button
-            className="mt-3 w-full py-3 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white cursor-pointer"
+            type="button"
+            className="w-full py-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white cursor-pointer"
             onClick={() => navigate("/login")}
           >
             Already Have an Account? Log In

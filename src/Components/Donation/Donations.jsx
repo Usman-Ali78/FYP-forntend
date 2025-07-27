@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { FaEdit, FaTrash, FaSearch, FaPlus} from "react-icons/fa";
+import { FaEdit, FaTrash, FaSearch, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useDonations from "../../hooks/useDonations";
 import LoadingSpinner from "../LoadingSpinner";
@@ -66,31 +66,30 @@ const Donations = () => {
     setDonations,
   } = useDonations();
 
-
   const sortedDonations = useMemo(() => {
-  const statusOrder = {
-    available: 0,
-    pending_pickup: 1,
-    delivered: 2,
-    expired: 3,
-  };
+    const statusOrder = {
+      available: 0,
+      pending_pickup: 1,
+      delivered: 2,
+      expired: 3,
+    };
 
-  return [...donations].sort((a, b) => {
-    const orderA = statusOrder[a.status] ?? 99;
-    const orderB = statusOrder[b.status] ?? 99;
+    return [...donations].sort((a, b) => {
+      const orderA = statusOrder[a.status] ?? 99;
+      const orderB = statusOrder[b.status] ?? 99;
 
-    if (orderA !== orderB) {
-      return orderA - orderB;
-    }
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
 
-    // Optional: sort within the same status by expiry_time
-    return new Date(a.expiry_time) - new Date(b.expiry_time);
-  });
-}, [donations]);
+      // Optional: sort within the same status by expiry_time
+      return new Date(a.expiry_time) - new Date(b.expiry_time);
+    });
+  }, [donations]);
 
- const filteredDonations = sortedDonations.filter((donation) =>
-  donation.item?.toLowerCase().includes(searchQuery.toLowerCase())
-);
+  const filteredDonations = sortedDonations.filter((donation) =>
+    donation.item?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const formatExpiryTime = (dateString, status) => {
     if (status === "delivered") return "✅ Delivered";
@@ -199,45 +198,52 @@ const Donations = () => {
           filteredDonations.map((donation) => (
             <div
               key={donation._id}
-              className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all"
+              className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all flex flex-col h-full"
             >
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-xl font-semibold">{donation.item}</h3>
-                <span
-                  className={`text-sm px-2 py-1 rounded-full ${
-                    donation.status === "available"
-                      ? "bg-green-600 text-white"
-                      : donation.status === "pending_pickup"
-                      ? "bg-yellow-300 text-yellow-800"
-                      : donation.status === "expired"
-                      ? "bg-red-500 text-white"
-                      : "bg-blue-600 text-white"
-                  }`}
-                >
-                  {donation.status}
-                </span>
-              </div>
-              <p className="text-gray-600 mb-2">
-                Quantity: {donation.quantity}
-                {donation.unit}
-              </p>
-              <p className="text-gray-500 text-sm mb-2">
-                📍 {donation.pickup_address}
-              </p>
-              <p className="text-gray-500 text-sm">
-                {formatExpiryTime(donation.expiry_time, donation.status)}
-              </p>
+              {/* Top content area */}
+              <div>
+                <div className="relative mb-4 min-h-[3rem]">
+                  <h3 className="text-xl font-semibold pr-20 break-words">
+                    {donation.item}
+                  </h3>
+                  <span
+                    className={`absolute top-0 right-0 text-sm px-2 py-1 rounded-full ${
+                      donation.status === "available"
+                        ? "bg-green-600 text-white"
+                        : donation.status === "pending_pickup"
+                        ? "bg-yellow-300 text-yellow-800"
+                        : donation.status === "expired"
+                        ? "bg-red-500 text-white"
+                        : "bg-blue-600 text-white"
+                    }`}
+                  >
+                    {donation.status}
+                  </span>
+                </div>
 
-              {donation.ngo_id && (
-                <p className="text-gray-500 text-sm mt-2">
-                  Assigned to: {donation.ngo_id.ngo_name}
+                <p className="text-gray-600 mb-2">
+                  Quantity: {donation.quantity}
+                  {donation.unit}
                 </p>
-              )}
+                <p className="text-gray-500 text-sm mb-2">
+                  📍 {donation.pickup_address}
+                </p>
+                <p className="text-gray-500 text-sm">
+                  {formatExpiryTime(donation.expiry_time, donation.status)}
+                </p>
 
-              <div className="flex justify-end space-x-2 mt-4 gap-1">
+                {donation.ngo_id && (
+                  <p className="text-gray-500 text-sm mt-2">
+                    Assigned to: {donation.ngo_id.ngo_name}
+                  </p>
+                )}
+              </div>
+
+              {/* Button area pinned at bottom */}
+              <div className="flex justify-end items-center space-x-2 mt-auto pt-4 border-t border-gray-200">
                 {["available", "pending_pickup"].includes(donation.status) && (
                   <button
-                    className="border-none text-white border-2 rounded-2xl p-1 text-center cursor-pointer bg-blue-500 "
+                    className="border-none text-white rounded-2xl px-1.5 py-1 text-center cursor-pointer bg-blue-500"
                     onClick={async () => {
                       const claims = await fetchDonationClaims(donation._id);
                       if (claims.length === 0) {
@@ -245,7 +251,7 @@ const Donations = () => {
                       }
                       if (claims.length > 0) {
                         setSelectedDonation(donation);
-                        setDonationClaims(claims); // Set fetched claims into state
+                        setDonationClaims(claims);
                         setShowClaimsModal(true);
                       }
                     }}
@@ -261,15 +267,16 @@ const Donations = () => {
                       : "text-gray-400 cursor-not-allowed"
                   }`}
                   onClick={() => {
-                    if(donation.status === "available"){
+                    if (donation.status === "available") {
                       editDonation(donation);
-                      setIsFormModalOpen(true);      
+                      setIsFormModalOpen(true);
                     }
                   }}
-                  disabled = {donation.status !== "available"}
+                  disabled={donation.status !== "available"}
                 >
                   <FaEdit />
                 </button>
+
                 <button
                   className={`text-[17px] transition-all ${
                     donation.status === "available"
@@ -396,7 +403,6 @@ const Donations = () => {
                   className="bg-green-500 text-white px-4 py-2 rounded-lg cursor-pointer"
                 >
                   {editingId ? "Update Donation" : "Add Donation"}
-                  
                 </button>
               </div>
             </form>
@@ -443,4 +449,3 @@ const Donations = () => {
 };
 
 export default Donations;
-

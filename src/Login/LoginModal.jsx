@@ -4,6 +4,7 @@ import { FaTimes } from "react-icons/fa";
 import image from "../assets/signupform.jpg";
 import api from "../../api/api";
 import { useAuth } from "../Context/authContext";
+import { toast } from "react-toastify";
 
 const LoginModal = () => {
   const { login } = useAuth();
@@ -48,32 +49,40 @@ const LoginModal = () => {
         password,
       });
       console.log(data);
+      toast.success("Login Successful");
       if (data.success) {
-        login(data.token, data.user.userType); // Using AuthContext's login
-
+        login(data.token, data.user.userType);
+        // Clear any previous navigation state
+        window.history.replaceState(null, "", "/");
         // Redirect based on userType
         switch (data.user.userType) {
           case "ngo":
-            navigate("/ngo");
+            setTimeout(() => {
+              navigate("/ngo");
+            }, 1000);
             break;
           case "restaurant":
-            navigate("/restaurant");
+            setTimeout(() => {
+              navigate("/restaurant");
+            }, 1000);
             break;
           case "admin":
-            navigate("/admin");
+            setTimeout(() => {
+              navigate("/admin");
+            }, 1000);
             break;
           default:
-            navigate("/");
+            setTimeout(() => {
+              navigate("/");
+            }, 1000);
         }
       } else {
-        alert("Login failed. Please check your credentials.");
+        toast.error("Login failed. Please check your credentials.");
       }
     } catch (error) {
       const message =
         error?.response?.data?.message || error.message || "Unexpected error";
-
-      console.log("Login error:", message);
-      alert("Login failed: " + message);
+      toast.error("Login failed: " + message);
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +94,7 @@ const LoginModal = () => {
       <div className="absolute inset-0 z-0">
         <div
           className="w-full h-full bg-center blur-[2px] brightness-75"
-          style={{ 
+          style={{
             backgroundImage: `url(${image})`,
             backgroundSize: "cover",
           }}
@@ -133,10 +142,16 @@ const LoginModal = () => {
               </p>
             )}
           </div>
+          <div
+            className="p-2 text-sm text-[oklch(0.89_0.08_124.91)] hover:text-[oklch(0.85_0.08_124.91)] cursor-pointer transition-colors duration-200 ease-in-out font-medium"
+            onClick={() => navigate("/forgot-password")}
+          >
+            Forgot Password?
+          </div>
 
           <button
             type="submit"
-            className="mt-6 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 transition-colors font-semibold cursor-pointer"
+            className="mt-2 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 transition-colors font-semibold cursor-pointer"
             disabled={isLoading}
           >
             {isLoading ? "Logging in..." : "Login"}

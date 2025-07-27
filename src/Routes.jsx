@@ -14,8 +14,14 @@ const NgoDashboard = lazy(() => import("./Ngo/NgoDashboard.jsx"));
 const LoginModal = lazy(() => import("./Login/LoginModal.jsx"));
 const SignupModal = lazy(() => import("./Signup/SignupModal.jsx"));
 const Unauthorized = lazy(() => import("./Components/Unauthorized.jsx"));
+const ForgotPassword = lazy(() =>
+  import("./ForgotPassword/forgotPassword.jsx")
+);
 
 const Routes = [
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/login", element: <LoginModal /> },
+  { path: "/signUp", element: <SignupModal /> },
   {
     path: "/",
     element: <App />,
@@ -23,36 +29,33 @@ const Routes = [
       { path: "/", element: <HomePage /> },
       { path: "/contactUs", element: <ContactUs /> },
       { path: "/about", element: <About /> },
-      { path: "/login", element: <LoginModal /> },
-      { path: "/signUp", element: <SignupModal /> },
       { path: "/unauthorized", element: <Unauthorized /> },
-      
-      // Protected routes
-      { 
-        path: "/admin", 
-        element: (
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        ) 
-      },
-      { 
-        path: "/restaurant", 
-        element: (
-          <ProtectedRoute allowedRoles={["restaurant"]}>
-            <RestaurantDashboard />
-          </ProtectedRoute>
-        ) 
-      },
-      { 
-        path: "/ngo", 
-        element: (
-          <ProtectedRoute allowedRoles={["ngo"]}>
-            <NgoDashboard />
-          </ProtectedRoute>
-        ) 
-      },
     ],
+  },
+  // Protected routes
+  {
+    path: "/admin",
+    element: (
+      <ProtectedRoute allowedRoles={["admin"]}>
+        <AdminDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/restaurant",
+    element: (
+      <ProtectedRoute allowedRoles={["restaurant"]}>
+        <RestaurantDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/ngo",
+    element: (
+      <ProtectedRoute allowedRoles={["ngo"]}>
+        <NgoDashboard />
+      </ProtectedRoute>
+    ),
   },
 ];
 

@@ -35,9 +35,12 @@ function NgoDashboard() {
     [donations]
   );
   const completedDonations = useMemo(
-    () => donations.filter(d => d.status === "delivered"),
-    [donations]
-  );
+  () => claims
+    .filter(claim => claim.status === "delivered")
+    .map(claim => claim.donation),
+  [claims]
+);
+
   const myActiveClaims = useMemo(
     () => claims.filter(claim => 
       claim.status !== "delivered" && 
