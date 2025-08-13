@@ -66,6 +66,9 @@ const Donations = () => {
     setDonations,
   } = useDonations();
 
+  console.log(donations);
+  
+
   const sortedDonations = useMemo(() => {
     const statusOrder = {
       available: 0,
@@ -86,6 +89,8 @@ const Donations = () => {
       return new Date(a.expiry_time) - new Date(b.expiry_time);
     });
   }, [donations]);
+
+  
 
   const filteredDonations = sortedDonations.filter((donation) =>
     donation.item?.toLowerCase().includes(searchQuery.toLowerCase())

@@ -15,11 +15,15 @@ const LoginModal = lazy(() => import("./Login/LoginModal.jsx"));
 const SignupModal = lazy(() => import("./Signup/SignupModal.jsx"));
 const Unauthorized = lazy(() => import("./Components/Unauthorized.jsx"));
 const ForgotPassword = lazy(() =>
-  import("./ForgotPassword/forgotPassword.jsx")
+  import("../src/Components/ForgotPassword/forgotPassword.jsx")
+);
+const ResetPassword = lazy(() =>
+  import("../src/Components/ResetPassword/ResetPassword.jsx")
 );
 
 const Routes = [
   { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/reset-password", element: <ResetPassword /> },
   { path: "/login", element: <LoginModal /> },
   { path: "/signUp", element: <SignupModal /> },
   {

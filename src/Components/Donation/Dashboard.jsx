@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../api/api";
-import { ul } from "framer-motion/client";
 
 const Dashboard = () => {
   const [activity, setActivity] = useState([]);
@@ -34,10 +33,9 @@ const Dashboard = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(data);
       setActivity(data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
   useEffect(() => {
