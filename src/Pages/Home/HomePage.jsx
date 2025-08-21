@@ -1,32 +1,34 @@
 import React from "react";
 import mainImage from "../../assets/MainPage.jpg";
-import image1 from "../../assets/Needy1.jfif"
-import image2 from "../../assets/Needy2.jfif"
-import image3 from "../../assets/Needy3.jfif"
+import image1 from "../../assets/Needy1.jfif";
+import image2 from "../../assets/Needy2.jfif";
+import image3 from "../../assets/Needy3.jfif";
 import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
-  const navigate = useNavigate()
-  const handleClick = ()=>{
-    navigate("/login")
-  }
-
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate("/login");
+  };
 
   return (
-    <div className="bg-white w-full min-h-screen p-4 sm:p-6 md:p-8 lg:p-12">
+    <div className="bg-gradient-to-r from-green-100  to-orange-100 w-full min-h-screen p-4 sm:p-6 md:p-8 lg:p-12">
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center text-center md:text-left">
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900">
-            <span className="text-orange-500">Be The Reason</span> <br />
-            Someone Smiles Today!
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 leading-snug">
+            <span className="text-green-600">Be The Reason</span> <br />
+            <span className="text-orange-500">Someone Smiles Today!</span>
           </h1>
-          <p className="text-gray-800 mt-4 text-sm sm:text-base lg:text-lg">
+          <p className="text-gray-700 mt-4 text-sm sm:text-base lg:text-lg">
             "Every day, tons of food go to waste while many go hungry. Our
             platform connects food donors with charities, ensuring that good
             food reaches the right hands. Join us in making a difference!"
           </p>
-          <button onClick={handleClick} className="mt-6 bg-orange-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-md hover:bg-orange-600 cursor-pointer transition duration-300">
+          <button
+            onClick={handleClick}
+            className="mt-6 bg-green-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-md hover:bg-green-700 cursor-pointer transition duration-300"
+          >
             Donate Now →
           </button>
         </div>
@@ -34,7 +36,7 @@ const HomePage = () => {
           <img
             src={mainImage}
             alt="Donation"
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl rounded-[20%] object-contain"
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl rounded-[20%] object-contain shadow-lg"
           />
         </div>
       </div>
@@ -44,7 +46,7 @@ const HomePage = () => {
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900">
           Your Donation Changes Lives
         </h2>
-        <p className="text-gray-800 mt-2 text-sm sm:text-base lg:text-lg">
+        <p className="text-gray-700 mt-2 text-sm sm:text-base lg:text-lg">
           See the impact of your generosity through these real stories.
         </p>
         <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -72,16 +74,30 @@ const HomePage = () => {
 
       {/* Why Choose Us Section */}
       <div className="text-center mt-12 sm:mt-16">
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900">Why Choose Us?</h2>
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900">
+          Why Choose Us?
+        </h2>
         <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
-          {["🌍 Global Impact", "🤝 Trusted by Communities", "📞 24/7 Support"].map((title, index) => (
+          {[
+            "🌍 Global Impact",
+            "🤝 Trusted by Communities",
+            "📞 24/7 Support",
+          ].map((title, index) => (
             <div
               key={index}
-              className="bg-white p-4 sm:p-6 rounded-xl shadow-md w-full mx-auto"
+              className="bg-green-50 p-4 sm:p-6 rounded-xl shadow-md w-full mx-auto hover:shadow-lg transition duration-300 "
             >
-              <div className="text-orange-500 text-3xl sm:text-4xl">{title.split(" ")[0]}</div>
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mt-2 sm:mt-4">{title.split(" ").slice(1).join(" ")}</h3>
-              <p className="text-gray-800 mt-2 text-sm sm:text-base lg:text-lg">
+              <div
+                className={`text-3xl sm:text-4xl ${
+                  index % 2 === 0 ? "text-green-600" : "text-orange-500"
+                }`}
+              >
+                {title.split(" ")[0]}
+              </div>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mt-2 sm:mt-4 text-gray-900">
+                {title.split(" ").slice(1).join(" ")}
+              </h3>
+              <p className="text-gray-700 mt-2 text-sm sm:text-base lg:text-lg">
                 {index === 0 && "Helping reduce food waste worldwide."}
                 {index === 1 && "Working with verified NGOs and volunteers."}
                 {index === 2 && "Dedicated team ready to assist you."}

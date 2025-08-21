@@ -19,6 +19,8 @@ import {
   FaEnvelope,
   FaLock,
   FaUnlock,
+  FaStar,
+  FaFilter,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import api from "../../api/api";
@@ -213,284 +215,229 @@ const Dashboard = () => {
   );
 };
 
+
+import { toast } from "react-toastify";
+
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
-  const getUsers = async () => {
-    const token = localStorage.getItem("token");
+  const [reviews, setReviews] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem("token");
+        const { data } = await api.get("/admin/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsers(data);
+      } catch (error) {
+        toast.error("Failed to fetch users.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // Fetch reviews
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await api.get("/reviews/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setReviews(data);
+      } catch (error) {
+        toast.error("Failed to fetch reviews.");
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  // Calculate average stars for a restaurant
+  const getAverageStars = (restaurantId) => {
+    const userReviews = reviews.filter(
+      (r) => r.restaurant && r.restaurant._id === restaurantId
+    );
+    if (userReviews.length === 0) return 0;
+    const avg =
+      userReviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+      userReviews.length;
+    return avg;
+  };
+
+  const toggleBlock = async (id, isBlocked) => {
     try {
-      const { data } = await api.get("/admin/users", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUsers(data);
-      console.log(data);
+      const token = localStorage.getItem("token");
+      const { data } = await api.put(
+        `/admin/users/${id}/block`,
+        { block: !isBlocked },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === id ? { ...u, blocked: data.data.blocked } : u
+        )
+      );
+
+      toast.success(data.message);
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to update user status.");
     }
   };
 
-  useEffect(() => {
-    getUsers();
-  }, []);
-
-  const filteredUsers = users.filter((user) => user.userType !== "admin");
-
-  const toggleBlockUser = (id) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === id ? { ...user, blocked: !user.blocked } : user
-      )
-    );
-  };
+  // Filter users (excluding admins)
+  const filteredUsers = users.filter(
+    (u) =>
+      u.userType !== "admin" &&
+      (filter === "all" || u.userType === filter)
+  );
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold mb-8 text-gray-800 border-b pb-2 flex items-center">
-        <FaUsers className="mr-2 text-blue-500" size={24} />
-        Manage Users
-      </h2>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Manage Users</h1>
+          <p className="text-gray-600 mt-2">View and manage all system users</p>
+        </div>
 
-      <div className="space-y-4">
-        {filteredUsers.map((user) => (
-          <div
-            key={user._id}
-            className="bg-white p-5 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex justify-between items-center border-l-4 border-blue-500"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-100 text-blue-600 rounded-full p-3">
-                <FaUser size={20} />
-              </div>
-              <div>
-                <div className="font-semibold text-lg text-gray-800">
-                  {user.userType === "ngo"
-                    ? user.ngo_name
-                        .split(" ")
-                        .map(
-                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" ")
-                    : user.restaurant_name
-                        .split(" ")
-                        .map(
-                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" ")}
-                  <span className="ml-2 text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    {user.userType}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600 flex items-center mt-1">
-                  <FaEnvelope className="mr-1" size={14} />
-                  {user.email}
-                </div>
-              </div>
+        {/* Filter Section */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FaFilter className="text-gray-500 mr-2" />
+              <span className="text-sm font-medium text-gray-700">Filter by:</span>
             </div>
-            <button
-              onClick={() => toggleBlockUser(user.id)}
-              className={`px-4 py-2 rounded-full text-white font-medium transition-all duration-200 flex items-center space-x-1 ${
-                user.blocked
-                  ? "bg-green-500 hover:bg-green-600 shadow-green"
-                  : "bg-red-500 hover:bg-red-600 shadow-red"
-              } shadow-md hover:shadow-lg`}
-            >
-              {user.blocked ? (
-                <>
-                  <FaUnlock size={16} />
-                  <span>Unblock User</span>
-                </>
-              ) : (
-                <>
-                  <FaLock size={16} />
-                  <span>Block User</span>
-                </>
-              )}
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setFilter("all")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  filter === "all"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                All Users
+              </button>
+              <button
+                onClick={() => setFilter("restaurant")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  filter === "restaurant"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Restaurants
+              </button>
+              <button
+                onClick={() => setFilter("ngo")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  filter === "ngo"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                NGOs
+              </button>
+            </div>
           </div>
-        ))}
+        </div>
+
+        {/* Users List */}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredUsers.map((user) => (
+              <div
+                key={user._id}
+                className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all border border-gray-100 flex flex-col"
+              >
+                {/* User Info */}
+                <div className="flex-grow mb-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">{user.name}</h2>
+                      <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                    </div>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                      {user.userType}
+                    </span>
+                  </div>
+
+                  {/* Show rating only for restaurants */}
+                  {user.userType === "restaurant" && (
+                    <div className="mt-4 flex items-center">
+                      <div className="flex">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <FaStar
+                            key={i}
+                            className={
+                              i < Math.round(getAverageStars(user._id))
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }
+                            size={16}
+                          />
+                        ))}
+                      </div>
+                      <span className="ml-2 text-sm text-gray-600">
+                        {getAverageStars(user._id).toFixed(1)} / 5
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Button - Now consistently at the bottom */}
+                <div className="mt-auto pt-4">
+                  <button
+                    onClick={() => toggleBlock(user._id, user.blocked)}
+                    className={`w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all duration-200 ${
+                      user.blocked
+                        ? "bg-green-500 hover:bg-green-600 text-white"
+                        : "bg-red-500 hover:bg-red-600 text-white"
+                    }`}
+                  >
+                    {user.blocked ? (
+                      <>
+                        <FaUnlock size={14} /> Unblock User
+                      </>
+                    ) : (
+                      <>
+                        <FaLock size={14} /> Block User
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && filteredUsers.length === 0 && (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center rounded-full bg-gray-100 p-4 mb-4">
+              <FaFilter className="text-gray-500 text-xl" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">No users found</h3>
+            <p className="text-gray-500">Try changing your filter settings</p>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-// const ManageUsers = () => {
-//   const [users, setUsers] = useState([]);
-//   const [loading, setLoading] = useState({
-//     users: false,
-//     blocking: {}, // Track blocking state per user
-//   });
-//   const [error, setError] = useState(null);
-
-//   const getUsers = async () => {
-//     const token = localStorage.getItem("token");
-//     try {
-//       setLoading((prev) => ({ ...prev, users: true }));
-//       const { data } = await api.get("/admin/users", {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setUsers(data);
-//     } catch (err) {
-//       setError("Failed to fetch users");
-//       console.error(err);
-//     } finally {
-//       setLoading((prev) => ({ ...prev, users: false }));
-//     }
-//   };
-
-//   useEffect(() => {
-//     getUsers();
-//   }, []);
-
-//   const toggleBlockUser = async (userId) => {
-//     let blockStatus; // Declare at the function scope
-
-//     try {
-//       const token = localStorage.getItem("token");
-//       const user = users.find((u) => u._id === userId);
-//       blockStatus = !user.blocked; // Assign value
-
-//       // Optimistic UI update
-//       setUsers((prevUsers) =>
-//         prevUsers.map((u) =>
-//           u._id === userId ? { ...u, blocked: blockStatus } : u
-//         )
-//       );
-
-//       // Update loading state
-//       setLoading((prev) => ({
-//         ...prev,
-//         blocking: { ...prev.blocking, [userId]: true },
-//       }));
-
-//       await api.put(
-//         `/api/admin/users/${userId}/block`,
-//         { block: blockStatus },
-//         { headers: { Authorization: `Bearer ${token}` } }
-//       );
-//     } catch (err) {
-//       // Revert on error - now blockStatus is accessible
-//       setUsers((prevUsers) =>
-//         prevUsers.map((u) =>
-//           u._id === userId ? { ...u, blocked: !blockStatus } : u
-//         )
-//       );
-//       setError(`Failed to ${blockStatus ? "block" : "unblock"} user`);
-//       console.error(err);
-//     } finally {
-//       setLoading((prev) => ({
-//         ...prev,
-//         blocking: { ...prev.blocking, [userId]: false },
-//       }));
-//     }
-//   };
-
-//   const filteredUsers = users.filter((user) => user.userType !== "admin");
-
-//   if (loading.users && users.length === 0) {
-//     return (
-//       <div className="flex justify-center p-8">
-//         <LoadingSpinner />
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="p-4 text-red-500 bg-red-50 rounded-md mx-auto max-w-4xl">
-//         {error}
-//         <button
-//           onClick={getUsers}
-//           className="ml-4 text-blue-500 hover:underline"
-//         >
-//           Retry
-//         </button>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="p-6 max-w-4xl mx-auto">
-//       <h2 className="text-3xl font-bold mb-8 text-gray-800 border-b pb-2 flex items-center">
-//         <FaUsers className="mr-2 text-blue-500" size={24} />
-//         Manage Users
-//       </h2>
-
-//       {error && (
-//         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-//           {error}
-//           <button
-//             onClick={() => setError(null)}
-//             className="float-right text-red-700 hover:underline"
-//           >
-//             Dismiss
-//           </button>
-//         </div>
-//       )}
-
-//       <div className="space-y-4">
-//         {filteredUsers.map((user) => (
-//           <div
-//             key={user._id}
-//             className="bg-white p-5 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex justify-between items-center border-l-4 border-blue-500"
-//           >
-//             <div className="flex items-center space-x-4">
-//               <div className="bg-blue-100 text-blue-600 rounded-full p-3">
-//                 <FaUser size={20} />
-//               </div>
-//               <div>
-//                 <div className="font-semibold text-lg text-gray-800">
-//                   {user.userType === "ngo"
-//                     ? user.ngo_name
-//                         .split(" ")
-//                         .map(
-//                           (word) => word.charAt(0).toUpperCase() + word.slice(1)
-//                         )
-//                         .join(" ")
-//                     : user.restaurant_name
-//                         .split(" ")
-//                         .map(
-//                           (word) => word.charAt(0).toUpperCase() + word.slice(1)
-//                         )
-//                         .join(" ")}
-//                   <span className="ml-2 text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-//                     {user.userType}
-//                   </span>
-//                 </div>
-//                 <div className="text-sm text-gray-600 flex items-center mt-1">
-//                   <FaEnvelope className="mr-1" size={14} />
-//                   {user.email}
-//                 </div>
-//               </div>
-//             </div>
-//             <button
-//               onClick={() => toggleBlockUser(user._id)}
-//               disabled={loading.blocking[user._id]}
-//               className={`px-4 py-2 rounded-full text-white font-medium transition-all duration-200 flex items-center space-x-1 ${
-//                 user.blocked
-//                   ? "bg-green-500 hover:bg-green-600"
-//                   : "bg-red-500 hover:bg-red-600"
-//               } shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
-//             >
-//               {loading.blocking[user._id] ? (
-//                 <span>Processing...</span>
-//               ) : user.blocked ? (
-//                 <>
-//                   <FaUnlock size={16} />
-//                   <span>Unblock</span>
-//                 </>
-//               ) : (
-//                 <>
-//                   <FaLock size={16} />
-//                   <span>Block</span>
-//                 </>
-//               )}
-//             </button>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
 
 const ManageDonations = () => {
   const { donations } = useDonations();
@@ -602,30 +549,95 @@ const ManageDonations = () => {
     </div>
   );
 };
+
 const Reports = () => {
-  const donationStatusData = [
-    { name: "Pending", value: 10, icon: "⏳", color: "yellow-500" },
-    { name: "Approved", value: 20, icon: "✅", color: "green-500" },
-    { name: "Rejected", value: 5, icon: "❌", color: "red-500" },
-  ];
+  const [donationStatusData, setDonationStatusData] = useState([]);
+  const [changeInDonations, setChangeInDonations] = useState(0);
+  const [donationTrendsData, setDonationTrendsData] = useState([]);
+  const { donations } = useDonations();
 
-  const donationTrendsData = [
-    { name: "Jan", donations: 40 },
-    { name: "Feb", donations: 55 },
-    { name: "Mar", donations: 75 },
-    { name: "Apr", donations: 60 },
-  ];
+  useEffect(() => {
+    if (!donations || donations.length === 0) return;
 
-  const totalDonations = donationTrendsData.reduce(
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+    const thisYear = now.getFullYear();
+    const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+
+    // --- Count donations this month and last month ---
+    const thisMonthDonations = donations.filter((d) => {
+      const date = new Date(d.createdAt);
+      return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
+    });
+
+    const lastMonthDonations = donations.filter((d) => {
+      const date = new Date(d.createdAt);
+      return (
+        date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear
+      );
+    });
+
+    const thisMonthTotal = thisMonthDonations.length;
+    const lastMonthTotal = lastMonthDonations.length;
+
+    const change =
+      lastMonthTotal === 0
+        ? thisMonthTotal > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100
+          );
+
+    setChangeInDonations(change);
+
+    // --- Status counts (from API) ---
+    const expired = donations.filter((d) => d.status === "expired").length;
+    const delivered = donations.filter((d) => d.status === "delivered").length;
+    const available = donations.filter((d) => d.status === "available").length;
+
+    setDonationStatusData([
+      { name: "Available", value: available, color: "yellow-500", icon: "⏳" },
+      { name: "Delivered", value: delivered, color: "green-500", icon: "✅" },
+      { name: "Expired", value: expired, color: "red-500", icon: "⏰" },
+    ]);
+
+    // --- Monthly trends (last 4 months only) ---
+    const last4Months = Array.from({ length: 4 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      return { key: `${d.getMonth()}-${d.getFullYear()}`, label: d };
+    }).reverse();
+
+    // Count donations for those months
+    const monthCounts = {};
+    donations.forEach((d) => {
+      const date = new Date(d.createdAt);
+      const key = `${date.getMonth()}-${date.getFullYear()}`;
+      monthCounts[key] = (monthCounts[key] || 0) + 1;
+    });
+
+    // Map into chart data
+    const monthlyData = last4Months.map((m) => ({
+      name: m.label.toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      }), // e.g. "Aug 2025"
+      donations: monthCounts[m.key] || 0,
+    }));
+
+    setDonationTrendsData(monthlyData);
+  }, [donations]);
+
+  const totalDonations = donations.length;
+  const totalDonation = donationTrendsData.reduce(
     (acc, curr) => acc + curr.donations,
     0
   );
-  const avgDonations = totalDonations / donationTrendsData.length;
-
-  const lastMonthData = donationTrendsData[donationTrendsData.length - 1];
-  const changeInDonations =
-    lastMonthData.donations -
-    donationTrendsData[donationTrendsData.length - 2]?.donations;
+  const avgDonations =
+    donationTrendsData.length > 0
+      ? totalDonations / donationTrendsData.length
+      : 0;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -641,13 +653,19 @@ const Reports = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-blue-50 p-4 rounded-lg">
             <p className="text-sm text-gray-600">Total Donations</p>
-            <p className="text-2xl font-bold text-blue-600">{totalDonations}</p>
+            <p className="text-2xl font-bold text-blue-600">
+              {donations.length}
+            </p>
           </div>
           <div className="bg-green-50 p-4 rounded-lg">
             <p className="text-sm text-gray-600">Change from Last Month</p>
-            <p className="text-2xl font-bold text-green-600">
+            <p
+              className={`text-2xl font-bold ${
+                changeInDonations >= 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
               {changeInDonations >= 0 ? "+" : ""}
-              {changeInDonations}
+              {changeInDonations}%
             </p>
             <p className="text-sm text-gray-600">
               {changeInDonations >= 0 ? "Increase" : "Decrease"} from last month
@@ -677,7 +695,10 @@ const Reports = () => {
                 </div>
                 <span className="text-gray-700 font-semibold">
                   {status.value} (
-                  {Math.round((status.value / totalDonations) * 100)}%)
+                  {totalDonations > 0
+                    ? Math.round((status.value / totalDonations) * 100)
+                    : 0}
+                  %)
                 </span>
               </div>
             ))}
@@ -687,11 +708,11 @@ const Reports = () => {
         {/* Donation Trends Over Time */}
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h3 className="text-xl font-semibold mb-6 text-gray-700">
-            Donation Trends Over Time
+            Donation Trends (Past 4 Months)
           </h3>
           <div>
             <h4 className="text-lg font-semibold mb-4 text-gray-600">
-              Average Donations per Month: {Math.round(avgDonations)}
+              Average Donations: {Math.round(avgDonations)}
             </h4>
             <div className="space-y-4">
               {donationTrendsData.map((month, index) => (
@@ -706,7 +727,11 @@ const Reports = () => {
                     <div
                       className="h-2 rounded"
                       style={{
-                        width: `${(month.donations / totalDonations) * 100}%`,
+                        width: `${
+                          totalDonation > 0
+                            ? (month.donations / totalDonation) * 100
+                            : 0
+                        }%`,
                         backgroundColor: "#4F46E5",
                       }}
                     ></div>

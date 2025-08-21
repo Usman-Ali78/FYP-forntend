@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import Logo from "../assets/Logo.jpg";
+import Logo1 from "../assets/Logo1.png";
 import {
   FaFacebookF,
   FaDiscord,
@@ -18,12 +18,12 @@ const Footer = () => {
     { href: "#", icon: <FaDribbble />, color: "hover:text-[#EA4C89]" }, // Dribbble Pink
   ];
   return (
-    <footer className="border-y mt-4 ">
+    <footer className="border-y bg-gradient-to-r from-green-100  to-orange-100">
       <div className="flex flex-wrap justify-between items-center max-w-screen-xl mx-auto py-8 px-4 gap-8">
         {/* Logo */}
         <div className="w-full sm:w-auto text-center">
           <Link className="flex justify-center sm:justify-start">
-            <img src={Logo} className="h-24 w-40 object-contain" alt="Logo" />
+            <img src={Logo1} className="h-24 w-40 object-contain" alt="Logo" />
           </Link>
         </div>
 

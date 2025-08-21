@@ -1,12 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CountUp from "react-countup";
+import useDonations from "../../hooks/useDonations";
+import api from "../../../api/api";
 
 const About = () => {
+  const [ngo, setNgo] = useState([]);
+  const [error, setError] = useState(null);
+
   let navigate = useNavigate();
 
+  const { donations } = useDonations();
+
+  useEffect(() => {
+    const fetchNgos = async () => {
+      try {
+        const res = await api.get("/donation/main-ngo");
+        setNgo(res.data);
+      } catch (err) {
+        setError("Failed to fetch NGOs");
+        console.error("Error fetching NGOs:", err);
+      }
+    };
+
+    fetchNgos();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 mt-10">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-gray-100 min-h-screen p-6">
+    <div className="bg-gray-100 min-h-screen p-6 bg-gradient-to-r from-green-100  to-orange-100">
       {/* Hero Section */}
       <div className="text-center py-10 bg-orange-700 text-white">
         <h1 className="text-5xl font-bold">
@@ -29,19 +58,19 @@ const About = () => {
 
       {/* How It Works */}
       <section className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center my-12">
-        <div className="p-6 bg-white shadow-lg rounded-lg">
+        <div className="p-6 bg-green-50 shadow-lg rounded-lg ">
           <h3 className="text-xl font-semibold">1. Donate Surplus Food</h3>
           <p className="text-gray-600">
             Restaurants and food businesses list extra food on our platform.
           </p>
         </div>
-        <div className="p-6 bg-white shadow-lg rounded-lg">
+        <div className="p-6 bg-green-50 shadow-lg rounded-lg ">
           <h3 className="text-xl font-semibold">2. Verified NGOs Collect</h3>
           <p className="text-gray-600">
             Our verified partners pick up and distribute the food safely.
           </p>
         </div>
-        <div className="p-6 bg-white shadow-lg rounded-lg">
+        <div className="p-6 bg-green-50 shadow-lg rounded-lg ">
           <h3 className="text-xl font-semibold">3. Help Those in Need</h3>
           <p className="text-gray-600">
             Meals reach families, homeless shelters, and communities in need.
@@ -55,19 +84,19 @@ const About = () => {
         <div className="flex justify-center gap-12 mt-6">
           <div>
             <h3 className="text-4xl font-bold">
-              <CountUp start={0} end={10000} duration={6} separator="," />+
+              <CountUp
+                start={0}
+                end={donations ? donations.length : 0}
+                duration={6}
+                separator=","
+              />
+              +
             </h3>
             <p>Meals Donated</p>
           </div>
           <div>
             <h3 className="text-4xl font-bold">
-              <CountUp start={0} end={500} duration={6} separator="," />+
-            </h3>
-            <p>Businesses Partnered</p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold">
-              <CountUp start={0} end={100} duration={6} separator="," />+
+              <CountUp start={0} end={ngo ? ngo.length :0} duration={6} separator="," /> +
             </h3>
             <p>NGOs Connected</p>
           </div>

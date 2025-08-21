@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import ReviewModal from "../Components/Donation/Review/ReviewModal";
 import {
   FaMapMarkerAlt,
   FaHandHoldingHeart,
@@ -11,8 +12,12 @@ import {
 import useDonations from "../hooks/useDonations";
 import ClaimDetailsModal from "../Components/Donation/Claim/ClaimDetailsModal";
 import LoadingSpinner from "../Components/LoadingSpinner";
+import api from "../../api/api";
 
 function NgoDashboard() {
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewDonationId, setReviewDonationId] = useState(null);
+
   // State for UI controls
   const [activeSection, setActiveSection] = useState("available");
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,47 +36,55 @@ function NgoDashboard() {
 
   // Memoized filtered data
   const availableDonations = useMemo(
-    () => donations.filter(d => d.status === "available"),
+    () => donations.filter((d) => d.status === "available"),
     [donations]
   );
   const completedDonations = useMemo(
-  () => claims
-    .filter(claim => claim.status === "delivered")
-    .map(claim => claim.donation),
-  [claims]
-);
+    () =>
+      claims
+        .filter((claim) => claim.status === "delivered")
+        .map((claim) => claim.donation),
+    [claims]
+  );
 
   const myActiveClaims = useMemo(
-    () => claims.filter(claim => 
-      claim.status !== "delivered" && 
-      claim.status !== "completed" && 
-      claim.status !== "rejected"
-    ),
+    () =>
+      claims.filter(
+        (claim) =>
+          claim.status !== "delivered" &&
+          claim.status !== "completed" &&
+          claim.status !== "rejected"
+      ),
     [claims]
   );
   const rejectedClaims = useMemo(
-    () => claims.filter(claim => claim.status === "rejected"),
+    () => claims.filter((claim) => claim.status === "rejected"),
     [claims]
   );
 
   // Filter donations and claims based on search query
   const filteredDonations = useMemo(
-    () => availableDonations.filter(d => 
-      d.item.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
+    () =>
+      availableDonations.filter((d) =>
+        d.item.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
     [availableDonations, searchQuery]
   );
   const filteredClaims = useMemo(
-    () => claims.filter(c => 
-      c.donation?.item?.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
+    () =>
+      claims.filter((c) =>
+        c.donation?.item?.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
     [claims, searchQuery]
   );
 
   // Handle claim submission directly
   const handleClaimSubmit = async (donationId) => {
     try {
-      await createClaimRequest(donationId, "Requesting this donation for our NGO");
+      await createClaimRequest(
+        donationId,
+        "Requesting this donation for our NGO"
+      );
       // The hook will automatically update the requestedDonations list
     } catch (error) {
       console.error("Error submitting claim:", error);
@@ -80,26 +93,55 @@ function NgoDashboard() {
 
   // Check if a donation has been requested
   const isDonationRequested = (donationId) => {
-    return requestedDonations.includes(donationId) || 
-           claims.some(claim => claim.donation?._id === donationId);
+    return (
+      requestedDonations.includes(donationId) ||
+      claims.some((claim) => claim.donation?._id === donationId)
+    );
   };
 
   // Navigation tabs configuration
   const navTabs = [
     { key: "available", label: "Available Donations", icon: <FaSearch /> },
     { key: "my-claims", label: "My Claims", icon: <FaHandHoldingHeart /> },
-    { key: "completed", label: "Completed Donations", icon: <FaClipboardCheck /> },
+    {
+      key: "completed",
+      label: "Completed Donations",
+      icon: <FaClipboardCheck />,
+    },
     { key: "rejected", label: "Rejected Donations", icon: <FaTimesCircle /> },
   ];
 
   // Section titles mapping
   const sectionTitles = {
-    "available": "Available Donations",
+    available: "Available Donations",
     "my-claims": "My Claim Requests",
-    "completed": "Completed Donations",
-    "rejected": "Rejected Donations",
+    completed: "Completed Donations",
+    rejected: "Rejected Donations",
   };
-  
+
+  const handleReviewSubmit = async ({ rating, comment, donationId }) => {
+  try {
+    const response = await api.post(
+      `/reviews/donations/${donationId}`,
+      { rating, comment }, // <-- body goes here directly
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // add auth token if needed
+        },
+      }
+    );
+
+    alert("Review submitted successfully!");
+    setShowReviewModal(false);
+    setReviewDonationId(null);
+  } catch (err) {
+    console.error("Error submitting review:", err.response?.data || err.message);
+    alert("Failed to submit review.");
+  }
+};
+
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-900">
       {/* Sidebar Navigation */}
@@ -108,7 +150,7 @@ function NgoDashboard() {
           <FaBars /> NGO Dashboard
         </h2>
         <ul className="mt-6 space-y-2">
-          {navTabs.map(tab => (
+          {navTabs.map((tab) => (
             <li
               key={tab.key}
               className={`p-3 rounded cursor-pointer transition-all duration-200 flex items-center gap-2 ${
@@ -126,9 +168,11 @@ function NgoDashboard() {
       <main className="flex-1 p-4 md:p-6 overflow-y-auto">
         {/* Header and Search */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">{sectionTitles[activeSection]}</h1>
+          <h1 className="text-2xl font-semibold">
+            {sectionTitles[activeSection]}
+          </h1>
         </div>
-        
+
         <div className="mt-6 relative">
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
           <input
@@ -152,23 +196,42 @@ function NgoDashboard() {
                   {filteredDonations.length === 0 ? (
                     <p className="text-gray-500">No available donations.</p>
                   ) : (
-                    filteredDonations.map(donation => (
-                      <div key={donation._id} className="bg-white p-4 rounded shadow hover:shadow-md transition">
-                        <h3 className="font-bold text-lg text-blue-700">{donation.item}</h3>
-                        <p className="text-sm text-gray-600">Donor: {donation.donor?.restaurant_name || "N/A"}</p>
-                        <p className="text-sm">Quantity: {donation.quantity}{donation.unit}</p>
-                        <p className="text-sm flex items-center gap-1"><FaMapMarkerAlt /> {donation.pickup_address}</p>
-                        <p className="text-sm flex items-center gap-1"><FaClock /> {new Date(donation.expiry_time).toLocaleString()}</p>
-                        
+                    filteredDonations.map((donation) => (
+                      <div
+                        key={donation._id}
+                        className="bg-white p-4 rounded shadow hover:shadow-md transition"
+                      >
+                        <h3 className="font-bold text-lg text-blue-700">
+                          {donation.item}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Donor: {donation.donor?.restaurant_name || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          Quantity: {donation.quantity}
+                          {donation.unit}
+                        </p>
+                        <p className="text-sm flex items-center gap-1">
+                          <FaMapMarkerAlt /> {donation.pickup_address}
+                        </p>
+                        <p className="text-sm flex items-center gap-1">
+                          <FaClock />{" "}
+                          {new Date(donation.expiry_time).toLocaleString()}
+                        </p>
+
                         <button
                           onClick={() => handleClaimSubmit(donation._id)}
                           className={`mt-3 w-full text-white py-2 rounded flex items-center justify-center gap-2 cursor-pointer ${
-                            isDonationRequested(donation._id) ? "bg-gray-500 hover:bg-gray-600" : "bg-blue-500 hover:bg-blue-600"
+                            isDonationRequested(donation._id)
+                              ? "bg-gray-500 hover:bg-gray-600"
+                              : "bg-blue-500 hover:bg-blue-600"
                           }`}
                           disabled={isDonationRequested(donation._id)}
                         >
                           <FaHandHoldingHeart />
-                          {isDonationRequested(donation._id) ? "Requested" : "Request Donation"}
+                          {isDonationRequested(donation._id)
+                            ? "Requested"
+                            : "Request Donation"}
                         </button>
                       </div>
                     ))
@@ -184,20 +247,31 @@ function NgoDashboard() {
                   {myActiveClaims.length === 0 ? (
                     <p className="text-gray-500">No active claim requests.</p>
                   ) : (
-                    myActiveClaims.map(claim => (
+                    myActiveClaims.map((claim) => (
                       <div
                         key={claim._id}
                         className={`bg-white p-4 rounded shadow hover:shadow-md transition border-l-4 ${
-                          claim.status === "approved" ? "border-green-500" :
-                          claim.status === "rejected" ? "border-red-500" : "border-blue-500"
+                          claim.status === "approved"
+                            ? "border-green-500"
+                            : claim.status === "rejected"
+                            ? "border-red-500"
+                            : "border-blue-500"
                         }`}
                         onClick={() => setSelectedClaim(claim)}
                         style={{ cursor: "pointer" }}
                       >
-                        <h3 className="font-bold text-lg">{claim.donation?.item || "Unknown Item"}</h3>
+                        <h3 className="font-bold text-lg">
+                          {claim.donation?.item || "Unknown Item"}
+                        </h3>
                         <p className="text-sm">Status: {claim.status}</p>
-                        <p className="text-sm">Quantity: {claim.donation?.quantity}{claim.donation?.unit}</p>
-                        <p className="text-sm">Requested: {new Date(claim.requestedAt).toLocaleString()}</p>
+                        <p className="text-sm">
+                          Quantity: {claim.donation?.quantity}
+                          {claim.donation?.unit}
+                        </p>
+                        <p className="text-sm">
+                          Requested:{" "}
+                          {new Date(claim.requestedAt).toLocaleString()}
+                        </p>
                       </div>
                     ))
                   )}
@@ -211,12 +285,23 @@ function NgoDashboard() {
                   {completedDonations.length === 0 ? (
                     <p className="text-gray-500">No completed donations.</p>
                   ) : (
-                    completedDonations.map(donation => (
-                      <div key={donation._id} className="bg-green-100 p-4 rounded shadow border-l-4 border-green-500">
+                    completedDonations.map((donation) => (
+                      <div
+                        key={donation._id}
+                        className="bg-green-100 p-4 rounded shadow border-l-4 border-green-500"
+                      >
                         <h3 className="font-bold text-lg">{donation.item}</h3>
-                        <p className="text-sm">Donor: {donation.donor?.restaurant_name || "N/A"}</p>
-                        <p className="text-sm">Quantity: {donation.quantity}{donation.unit}</p>
-                        <p className="text-sm">Delivered: {new Date(donation.updatedAt).toLocaleString()}</p>
+                        <p className="text-sm">
+                          Donor: {donation.donor?.restaurant_name || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          Quantity: {donation.quantity}
+                          {donation.unit}
+                        </p>
+                        <p className="text-sm">
+                          Delivered:{" "}
+                          {new Date(donation.updatedAt).toLocaleString()}
+                        </p>
                       </div>
                     ))
                   )}
@@ -228,16 +313,36 @@ function NgoDashboard() {
               <section className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {rejectedClaims.length === 0 ? (
-                    <p className="text-gray-500">No rejected donations found.</p>
+                    <p className="text-gray-500">
+                      No rejected donations found.
+                    </p>
                   ) : (
-                    rejectedClaims.map(claim => (
-                      
-                      <div key={claim._id} className="bg-red-100 p-4 rounded shadow border-l-4 border-red-500">
-                        <h3 className="font-bold text-lg">{claim.donation?.item}</h3>
-                        <p className="text-sm">Donor: {claim.donation?.donor?.restaurant_name|| claim.donor?.restaurant_name || claim.restaurant_name || "N/A"}</p>
-                        <p className="text-sm">Quantity: {claim.donation?.quantity}{claim.donation?.unit}</p>
-                        <p className="text-sm">Rejected On: {new Date(claim.updatedAt).toLocaleString()}</p>
-                        <p className="text-sm italic text-gray-600">Status: {claim.status}</p>
+                    rejectedClaims.map((claim) => (
+                      <div
+                        key={claim._id}
+                        className="bg-red-100 p-4 rounded shadow border-l-4 border-red-500"
+                      >
+                        <h3 className="font-bold text-lg">
+                          {claim.donation?.item}
+                        </h3>
+                        <p className="text-sm">
+                          Donor:{" "}
+                          {claim.donation?.donor?.restaurant_name ||
+                            claim.donor?.restaurant_name ||
+                            claim.restaurant_name ||
+                            "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          Quantity: {claim.donation?.quantity}
+                          {claim.donation?.unit}
+                        </p>
+                        <p className="text-sm">
+                          Rejected On:{" "}
+                          {new Date(claim.updatedAt).toLocaleString()}
+                        </p>
+                        <p className="text-sm italic text-gray-600">
+                          Status: {claim.status}
+                        </p>
                       </div>
                     ))
                   )}
@@ -247,13 +352,29 @@ function NgoDashboard() {
           </>
         )}
 
-        <ClaimDetailsModal
+        {/* <ClaimDetailsModal
           claim={selectedClaim}
           onClose={() => setSelectedClaim(null)}
           onMarkDelivered={async () => {
             await markDelivered(selectedClaim.donation._id);
           }}
+        /> */}
+        <ClaimDetailsModal
+          claim={selectedClaim}
+          onClose={() => setSelectedClaim(null)}
+          onMarkDelivered={async () => {
+            await markDelivered(selectedClaim.donation._id);
+            setReviewDonationId(selectedClaim.donation._id); // store for review
+            setShowReviewModal(true); // open modal
+          }}
         />
+        {showReviewModal && (
+          <ReviewModal
+            donationId={reviewDonationId}
+            onClose={() => setShowReviewModal(false)}
+            onSubmit={handleReviewSubmit}
+          />
+        )}
       </main>
     </div>
   );
