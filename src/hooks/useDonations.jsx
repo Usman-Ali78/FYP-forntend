@@ -135,9 +135,17 @@ const useDonations = () => {
 
       // Optimistic UI update
       setDonations((prev) =>
-        prev.map((d) => (d._id === donationId ? { ...d, status: "delivered" } : d))
+        prev.map((d) =>
+          d._id === donationId ? { ...d, status: "delivered" } : d
+        )
       );
-      setClaims((prev) => prev.filter((claim) => claim.donation?._id !== donationId));
+      setClaims((prev) =>
+        prev.map((claim) =>
+          claim.donation?._id === donationId
+            ? { ...claim, status: "delivered" }
+            : claim
+        )
+      );
 
       // Update server
       await api.put(
@@ -156,18 +164,29 @@ const useDonations = () => {
       if (!token) return;
 
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const payload = { ...formData, status: "available" };
+      const payload = {
+        ...formData,
+        status: "available",
+        pickup_location: formData.pickup_location || {
+          type: "Point",
+          coordinates: [0, 0],
+        },
+      };
 
       if (editingId) {
-        const res = await api.put(`/donation/${editingId}/edit`, payload, config);
+        const res = await api.put(
+          `/donation/${editingId}/edit`,
+          payload,
+          config
+        );
         setDonations((prev) =>
           prev.map((d) => (d._id === editingId ? res.data : d))
         );
-        toast.success("Donation updated successfulyy")
+        toast.success("Donation updated successfulyy");
       } else {
         const res = await api.post("/donation", payload, config);
         setDonations((prev) => [res.data, ...prev]);
-        toast.success("Donation added successfully")
+        toast.success("Donation added successfully");
       }
 
       resetForm();

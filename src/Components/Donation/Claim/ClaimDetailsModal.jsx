@@ -5,17 +5,31 @@ const ClaimDetailsModal = ({ claim, onClose, onMarkDelivered }) => {
   if (!claim) return null;
   const [isProcessing, setIsProcessing] = useState(false);
   
-  const handleDelivery = async () => {
-    setIsProcessing(true);
-    try {
-      await onMarkDelivered();
-      onClose(); // Only close after successful delivery
-    } catch (error) {
-      console.error("Delivery failed:", error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+const handleDelivery = async () => {
+  if (!claim?.donation?._id) {
+    console.error("Cannot mark delivered: donation ID missing");
+    return;
+  }
+  setIsProcessing(true);
+
+  try {
+    await onMarkDelivered(); // this calls the backend
+
+    // show success message
+    alert("Donation marked as delivered successfully!");
+    onClose();
+  } catch (error) {
+    console.error("Delivery failed:", error);
+
+    // Check if backend returned a message
+    const errMsg =
+      error.response?.data?.message ||
+      "Failed to mark donation as delivered.";
+    alert(errMsg);
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

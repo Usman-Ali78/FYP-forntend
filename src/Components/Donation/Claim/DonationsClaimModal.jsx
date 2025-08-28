@@ -17,9 +17,20 @@ const DonationClaimsModal = ({ donation, claims, onApprove, onClose, onReject })
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-medium">{claim.ngo.name}</h4>
-                    <p className="text-sm text-gray-600">
-                      {claim.ngo.ngo_location}
-                    </p>
+                    
+                    {/* ✅ Fix: Safely show NGO location */}
+                    {claim.ngo.ngo_location?.coordinates ? (
+                      <a
+                        href={`https://www.google.com/maps?q=${claim.ngo.ngo_location.coordinates[1]},${claim.ngo.ngo_location.coordinates[0]}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline text-sm"
+                      >
+                        View Location
+                      </a>
+                    ) : (
+                      <p className="text-sm text-gray-600">No location available</p>
+                    )}
                   </div>
 
                   {claim.status === "pending" && (

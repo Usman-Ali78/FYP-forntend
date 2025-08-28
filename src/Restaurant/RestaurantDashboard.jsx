@@ -1,25 +1,23 @@
 import React, { useState } from "react";
+import { Link, useLocation, Outlet } from "react-router-dom";
 import {
   FaUtensils,
-  FaClipboardList,
   FaMapMarkerAlt,
-  FaCommentDots,
   FaChartBar,
   FaCog,
   FaBars,
   FaTimes,
 } from "react-icons/fa";
-import { MdNotifications } from "react-icons/md";
-import Donations from "../Components/Donation/Donations";
-import Dashboard from "../Components/Donation/Dashboard";
-import Map from "../Components/Donation/Map";
-import Chat from "../Components/Donation/Chat";
-import Notifications from "../Components/Donation/Notifications";
-import Settings from "../Components/Donation/Settings";
 
 const RestaurantDashboard = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Function to check if link is active
+  const isActive = (path) => location.pathname.includes(path);
+
+  const navBtnClasses =
+    "flex items-center space-x-2 p-2 rounded transition-colors";
 
   return (
     <div className="flex h-screen bg-gray-100 flex-col md:flex-row">
@@ -45,71 +43,59 @@ const RestaurantDashboard = () => {
           Restaurant Dashboard
         </h2>
         <nav className="flex flex-col space-y-4">
-          <button
-            className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded"
-            onClick={() => {
-              setActiveTab("dashboard");
-              setIsSidebarOpen(false);
-            }}
+          <Link
+            to="dashboard"
+            className={`${navBtnClasses} ${
+              isActive("dashboard")
+                ? "bg-gray-700 text-yellow-400"
+                : "hover:bg-gray-700"
+            }`}
+            onClick={() => setIsSidebarOpen(false)}
           >
             <FaChartBar /> <span>Dashboard</span>
-          </button>
-          <button
-            className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded"
-            onClick={() => {
-              setActiveTab("donations");
-              setIsSidebarOpen(false);
-            }}
+          </Link>
+
+          <Link
+            to="foodDonation"
+            className={`${navBtnClasses} ${
+              isActive("foodDonation")
+                ? "bg-gray-700 text-yellow-400"
+                : "hover:bg-gray-700"
+            }`}
+            onClick={() => setIsSidebarOpen(false)}
           >
             <FaUtensils /> <span>Food Donations</span>
-          </button>
-          <button
-            className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded"
-            onClick={() => {
-              setActiveTab("map");
-              setIsSidebarOpen(false);
-            }}
+          </Link>
+
+          <Link
+            to="ngosNearby"
+            className={`${navBtnClasses} ${
+              isActive("ngosNearby")
+                ? "bg-gray-700 text-yellow-400"
+                : "hover:bg-gray-700"
+            }`}
+            onClick={() => setIsSidebarOpen(false)}
           >
             <FaMapMarkerAlt /> <span>NGOs Nearby</span>
-          </button>
-          <button
-            className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded"
-            onClick={() => {
-              setActiveTab("chat");
-              setIsSidebarOpen(false);
-            }}
-          >
-            <FaCommentDots /> <span>Live Chat</span>
-          </button>
-          <button
-            className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded"
-            onClick={() => {
-              setActiveTab("settings");
-              setIsSidebarOpen(false);
-            }}
+          </Link>
+
+          <Link
+            to="settings"
+            className={`${navBtnClasses} ${
+              isActive("settings")
+                ? "bg-gray-700 text-yellow-400"
+                : "hover:bg-gray-700"
+            }`}
+            onClick={() => setIsSidebarOpen(false)}
           >
             <FaCog /> <span>Settings</span>
-          </button>
-          <button
-            className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded"
-            onClick={() => {
-              setActiveTab("notifications");
-              setIsSidebarOpen(false);
-            }}
-          >
-            <MdNotifications /> <span>Notifications</span>
-          </button>
+          </Link>
         </nav>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-6 overflow-y-auto">
-        {activeTab === "dashboard" && <Dashboard />}
-        {activeTab === "donations" && <Donations />}
-        {activeTab === "map" && <Map />}
-        {activeTab === "chat" && <Chat/>}
-        {activeTab === "settings" && <Settings />}
-        {activeTab === "notifications" && <Notifications />}
+        <Outlet /> {/* 👈 child route renders here */}
       </main>
     </div>
   );
